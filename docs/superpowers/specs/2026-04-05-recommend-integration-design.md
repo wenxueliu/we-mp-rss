@@ -84,7 +84,36 @@ we-mp-rss/
 | created_at | DateTime | 创建时间 |
 | updated_at | DateTime | 更新时间 |
 
-#### 4. recommend_knowledge（知识库表）
+#### 4. recommend_sources（内容源配置表）
+
+| 字段 | 类型 | 说明 |
+|------|------|
+| id | Integer | 主键，自增 |
+| name | String(100) | 源名称 |
+| source_type | String(50) | 源类型：rss, opencli, wechat |
+| url | String(500) | 源 URL 或配置 |
+| enabled | Boolean | 是否启用 |
+| config | Text | JSON 配置 |
+| fetch_interval | Float | 抓取间隔（小时），默认 24 |
+| last_fetched_at | DateTime | 最后抓取时间 |
+| created_at | DateTime | 创建时间 |
+| updated_at | DateTime | 更新时间 |
+
+#### 5. recommend_source_presets（内容源预设表）
+
+| 字段 | 类型 | 说明 |
+|------|------|
+| id | Integer | 主键，自增 |
+| name | String(100) | 预设名称 |
+| platform | String(50) | 平台名称 |
+| command | String(50) | 命令 |
+| limit | Integer | 数量限制，默认 10 |
+| fetch_interval | Float | 抓取间隔（小时） |
+| enabled | Boolean | 是否启用 |
+| created_at | DateTime | 创建时间 |
+| updated_at | DateTime | 更新时间 |
+
+#### 6. recommend_knowledge（知识库表）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -161,6 +190,20 @@ score = 新鲜度(40%) + 偏好匹配(30%) + 内容质量(20%) + 时效性(10%)
 | GET | /api/v1/wx/recommend/knowledge | 获取知识库列表 |
 | POST | /api/v1/wx/recommend/knowledge | 保存到知识库 |
 | DELETE | /api/v1/wx/recommend/knowledge/{id} | 从知识库删除 |
+
+### 内容源管理接口
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/wx/recommend/sources | 获取内容源列表 |
+| POST | /api/v1/wx/recommend/sources | 创建内容源 |
+| GET | /api/v1/wx/recommend/sources/{id} | 获取内容源详情 |
+| PUT | /api/v1/wx/recommend/sources/{id} | 更新内容源 |
+| DELETE | /api/v1/wx/recommend/sources/{id} | 删除内容源 |
+| POST | /api/v1/wx/recommend/sources/{id}/fetch | 手动抓取内容 |
+| POST | /api/v1/wx/recommend/sources/fetch-all | 抓取所有启用的源 |
+| GET | /api/v1/wx/recommend/presets | 获取平台预设列表 |
+| POST | /api/v1/wx/recommend/presets | 创建预设 |
 
 ### 请求/响应示例
 
@@ -243,6 +286,16 @@ score = 新鲜度(40%) + 偏好匹配(30%) + 内容质量(20%) + 时效性(10%)
 - 内容长度偏好
 - 新鲜度/质量权重调整
 
+### 4. 内容源管理页 (SourcesView.vue)
+
+- 源列表展示（名称、类型、状态、最后抓取时间）
+- 支持的源类型：
+  - **RSS**: 输入 RSS URL，自动解析标题
+  - **OpenCLI**: hackernews, reddit, bilibili, zhihu, youtube, twitter, devto, lobsters, stackoverflow
+- 添加/编辑/删除内容源
+- 手动触发抓取
+- 预设平台快速添加
+
 ## 移植文件清单
 
 从 recommend 项目移植以下文件：
@@ -258,6 +311,7 @@ score = 新鲜度(40%) + 偏好匹配(30%) + 内容质量(20%) + 时效性(10%)
 | frontend/src/views/HomeView.vue | web_ui/src/views/RecommendView.vue |
 | frontend/src/views/KnowledgeView.vue | web_ui/src/views/KnowledgeView.vue |
 | frontend/src/views/InteractionsView.vue | 合并到 RecommendView.vue |
+| frontend/src/views/SourcesView.vue | web_ui/src/views/SourcesView.vue |
 
 ## 配置项
 
