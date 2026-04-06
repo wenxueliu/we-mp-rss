@@ -183,3 +183,17 @@ cascade:
   heartbeat_interval: ${CASCADE_HEARTBEAT_INTERVAL:-60}
   # 子节点任务拉取间隔（秒），默认30秒
   task_poll_interval: ${CASCADE_TASK_POLL_INTERVAL:-30}
+
+# 推荐模块配置
+recommend:
+  enabled: ${RECOMMEND_ENABLED:-True}
+  # 评分权重
+  freshness_weight: ${RECOMMEND_FRESHNESS_WEIGHT:-0.4}
+  preference_weight: ${RECOMMEND_PREFERENCE_WEIGHT:-0.3}
+  quality_weight: ${RECOMMEND_QUALITY_WEIGHT:-0.2}
+  timeliness_weight: ${RECOMMEND_TIMELINESS_WEIGHT:-0.1}
+  # 定时任务
+  auto_fetch: ${RECOMMEND_AUTO_FETCH:-True}
+  fetch_interval_hours: ${RECOMMEND_FETCH_INTERVAL_HOURS:-6}
+  # 偏好学习
+  learning_rate: ${RECOMMEND_LEARNING_RATE:-0.1}
