@@ -19,6 +19,26 @@ class RecommendationResult:
     timeliness: float
     reason: str
 
+    @property
+    def status(self) -> str:
+        """根据分数判断推荐状态"""
+        if self.score >= 60:
+            return "recommended"
+        elif self.score < 40:
+            return "not_recommended"
+        else:
+            return "pending"
+
+
+def calculate_content_status(score: float) -> str:
+    """根据分数计算内容状态"""
+    if score >= 60:
+        return "recommended"
+    elif score < 40:
+        return "not_recommended"
+    else:
+        return "pending"
+
 
 class RecommenderEngine:
     """推荐引擎"""
@@ -38,9 +58,12 @@ class RecommenderEngine:
     def calculate_score(
         self,
         content: Any,
-        user_preferences: Dict[str, Any],
+        user_preferences: Dict[str, Any] = None,
         similarity_scores: List[float] = None,
     ) -> RecommendationResult:
+        """计算单个内容的推荐分数"""
+        if user_preferences is None:
+            user_preferences = {}
         """计算单个内容的推荐分数"""
         # 计算新鲜度
         freshness = self._calculate_freshness(content, similarity_scores or [])

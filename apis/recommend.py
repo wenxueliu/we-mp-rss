@@ -10,7 +10,7 @@ from core.recommend.models import (
     RecommendSource, RecommendContent, RecommendInteraction,
     RecommendPreference, RecommendKnowledge, RecommendSourcePreset
 )
-from core.recommend.engine import RecommenderEngine
+from core.recommend.engine import RecommenderEngine, calculate_content_status
 from core.recommend.collectors import RSSCollector, OpenCLICollector, ContentItem
 from apis.base import success_response, error_response
 from core.auth import get_current_user
@@ -402,11 +402,27 @@ async def fetch_source(source_id: int, session=Depends(get_session)):
         return error_response(400, f"不支持的源类型: {source.source_type}")
 
     items = await collector.fetch(source.url)
+    engine = RecommenderEngine()
 
     for item in items:
         existing = session.query(RecommendContent).filter(RecommendContent.url == item.url).first()
         if existing:
             continue
+        # 创建临时对象用于计算分数
+        class TempContent:
+            def __init__(self, item):
+                self.id = 0
+                self.title = item.title
+                self.url = item.url
+                self.description = item.description
+                self.author = item.author
+                self.published_at = item.published_at
+                self.thumbnail = item.thumbnail
+                self.tags = json.dumps(item.tags) if item.tags else None
+                self.source_name = source.name
+        temp = TempContent(item)
+        result = engine.calculate_score(temp, {})
+        status = calculate_content_status(result.score)
         content = RecommendContent(
             source_id=source.id,
             source_type=source.source_type,
@@ -418,7 +434,7 @@ async def fetch_source(source_id: int, session=Depends(get_session)):
             published_at=item.published_at,
             thumbnail=item.thumbnail,
             tags=json.dumps(item.tags) if item.tags else None,
-            status="pending",
+            status=status,
         )
         session.add(content)
 
@@ -431,6 +447,7 @@ async def fetch_source(source_id: int, session=Depends(get_session)):
 async def fetch_all_sources(session=Depends(get_session)):
     """抓取所有启用的源"""
     sources = session.query(RecommendSource).filter(RecommendSource.enabled == True).all()
+    engine = RecommenderEngine()
     total = 0
     for source in sources:
         if source.source_type == "rss":
@@ -445,6 +462,20 @@ async def fetch_all_sources(session=Depends(get_session)):
             existing = session.query(RecommendContent).filter(RecommendContent.url == item.url).first()
             if existing:
                 continue
+            class TempContent:
+                def __init__(self, item):
+                    self.id = 0
+                    self.title = item.title
+                    self.url = item.url
+                    self.description = item.description
+                    self.author = item.author
+                    self.published_at = item.published_at
+                    self.thumbnail = item.thumbnail
+                    self.tags = json.dumps(item.tags) if item.tags else None
+                    self.source_name = source.name
+            temp = TempContent(item)
+            result = engine.calculate_score(temp, {})
+            status = calculate_content_status(result.score)
             content = RecommendContent(
                 source_id=source.id,
                 source_type=source.source_type,
@@ -456,7 +487,7 @@ async def fetch_all_sources(session=Depends(get_session)):
                 published_at=item.published_at,
                 thumbnail=item.thumbnail,
                 tags=json.dumps(item.tags) if item.tags else None,
-                status="pending",
+                status=status,
             )
             session.add(content)
         source.last_fetched_at = datetime.utcnow()

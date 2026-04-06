@@ -50,10 +50,9 @@ onMounted(() => {
         <a-space direction="vertical" align="end" class="header-actions">
           <a-select v-model="filterStatus" placeholder="状态筛选" allow-clear style="width: 140px">
             <a-option value="">全部</a-option>
-            <a-option value="pending">待处理</a-option>
             <a-option value="recommended">推荐</a-option>
-            <a-option value="accepted">已接受</a-option>
-            <a-option value="rejected">已拒绝</a-option>
+            <a-option value="not_recommended">不推荐</a-option>
+            <a-option value="pending">待定</a-option>
           </a-select>
           <a-button type="primary" @click="handleRefresh">
             <template #icon>
