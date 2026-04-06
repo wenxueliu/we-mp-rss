@@ -147,3 +147,69 @@ class RSSCollector(BaseCollector):
         clean_text = clean_text.replace("&lt;", "<").replace("&gt;", ">")
         clean_text = clean_text.replace("&quot;", '"').replace("&#39;", "'")
         return " ".join(clean_text.split())
+
+
+class OpenCLICollector(BaseCollector):
+    """opencli-rs 采集器"""
+
+    SUPPORTED_PLATFORMS = {
+        "hackernews": ["top", "new", "best", "ask", "show", "job"],
+        "reddit": ["hot", "new", "top", "rising"],
+        "bilibili": ["hot", "new", "week", "month"],
+        "zhihu": ["hot", "new"],
+        "youtube": ["trending", "hot"],
+        "twitter": ["home", "user", "search", "trending"],
+        "devto": ["top", "recent"],
+        "lobsters": ["hot", "new", "top"],
+        "stackoverflow": ["questions", "questions tagged"],
+    }
+
+    def get_source_type(self) -> str:
+        return "opencli"
+
+    def _parse_source_url(self, source_url: str) -> Dict[str, Any]:
+        if source_url.startswith("{"):
+            return json.loads(source_url)
+        parts = source_url.split(":")
+        if len(parts) < 2:
+            raise ValueError(f"无效的 opencli 源配置: {source_url}")
+        platform = parts[0]
+        command = parts[1]
+        limit = int(parts[2]) if len(parts) > 2 else 10
+        return {"platform": platform, "command": command, "limit": limit}
+
+    async def fetch(self, source_url: str) -> List[ContentItem]:
+        config = self._parse_source_url(source_url)
+        platform = config["platform"]
+        command = config["command"]
+        limit = config["limit"]
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["opencli-rs", platform, command, "--limit", str(limit)],
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            if result.returncode != 0:
+                return []
+            data = json.loads(result.stdout)
+            return self._parse_items(data)
+        except Exception as e:
+            print(f"OpenCLI 采集错误：{e}")
+            return []
+
+    def _parse_items(self, data: List[Dict]) -> List[ContentItem]:
+        items = []
+        for item in data[: self.max_items]:
+            items.append(ContentItem(
+                title=item.get("title", ""),
+                url=item.get("url", ""),
+                description=item.get("description", "") or item.get("summary", ""),
+                author=item.get("author", "") or item.get("user", ""),
+                published_at=self.parse_date(item.get("published_at", "")),
+                thumbnail=item.get("thumbnail", "") or item.get("image", ""),
+                tags=item.get("tags", []) or [],
+                raw_data=item,
+            ))
+        return items
