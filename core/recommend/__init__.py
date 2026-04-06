@@ -9,6 +9,7 @@ from .models import (
     RecommendKnowledge,
     RecommendSourcePreset,
     init_recommend_db,
+    create_recommend_tables,
 )
 from .engine import RecommenderEngine, RecommendationResult
 from .collectors import BaseCollector, RSSCollector, OpenCLICollector, ContentItem

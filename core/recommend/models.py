@@ -147,3 +147,8 @@ def init_recommend_db(database_url: str):
     Base.metadata.create_all(engine)
     SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
     return SessionLocal
+
+
+def create_recommend_tables(engine):
+    """创建推荐模块表，使用已存在的引擎"""
+    Base.metadata.create_all(engine)

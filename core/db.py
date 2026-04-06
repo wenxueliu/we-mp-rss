@@ -99,6 +99,13 @@ class Db:
         except Exception as e:
             print_error(f"Error creating tables: {e}")
 
+        # 创建推荐模块表
+        try:
+            from core.recommend import create_recommend_tables
+            create_recommend_tables(self.engine)
+        except Exception as e:
+            print_error(f"Error creating recommend tables: {e}")
+
         print('All Tables Created Successfully!')    
         
     def close(self) -> None:
