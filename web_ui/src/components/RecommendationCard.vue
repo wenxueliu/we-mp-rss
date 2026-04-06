@@ -72,22 +72,32 @@ const formatDate = (dateStr: string) => {
 
 <style scoped>
 .recommendation-card {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .card-content {
   display: flex;
+  flex-direction: column;
+}
+.thumbnail {
+  width: 100%;
+  max-height: 200px;
+  overflow: hidden;
 }
 .thumbnail img {
-  width: 200px;
-  height: 150px;
+  width: 100%;
+  height: auto;
+  max-height: 200px;
   object-fit: cover;
 }
 .info {
-  padding: 16px;
+  padding: 12px;
   flex: 1;
 }
 .title {
   margin: 0 0 8px 0;
+  font-size: 16px;
+  line-height: 1.4;
+  word-break: break-all;
 }
 .description {
   color: #666;
@@ -96,29 +106,59 @@ const formatDate = (dateStr: string) => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 .meta {
   font-size: 12px;
   color: #999;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 .meta span {
   margin-right: 12px;
+  margin-bottom: 4px;
+  display: inline-block;
 }
 .scores {
   margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .scores .arco-tag {
-  margin-right: 8px;
+  margin-right: 0;
 }
 .reason {
   font-size: 13px;
   color: #888;
   margin-bottom: 12px;
 }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .actions .arco-btn {
-  margin-right: 8px;
+  margin-right: 0;
+  flex: 1;
+  min-width: 80px;
+}
+
+/* 桌面端：横排布局 */
+@media (min-width: 768px) {
+  .card-content {
+    flex-direction: row;
+  }
+  .thumbnail {
+    width: 200px;
+    flex-shrink: 0;
+    max-height: none;
+  }
+  .thumbnail img {
+    width: 200px;
+    height: 150px;
+    max-height: none;
+  }
 }
 </style>
