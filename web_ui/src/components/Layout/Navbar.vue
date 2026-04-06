@@ -17,6 +17,12 @@
         </template>
         推荐内容
       </a-menu-item>
+      <a-menu-item key="/interaction-history">
+        <template #icon>
+          <icon-history />
+        </template>
+        交互历史
+      </a-menu-item>
       <a-menu-item key="/sources">
         <template #icon>
           <icon-link />

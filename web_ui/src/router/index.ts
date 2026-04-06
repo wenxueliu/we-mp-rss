@@ -248,6 +248,14 @@ const routes = [
         }
       },
       {
+        path: 'interaction-history',
+        name: 'InteractionHistory',
+        component: () => import('@/views/InteractionHistoryView.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
+      {
         path: 'sources',
         name: 'Sources',
         component: () => import('@/views/SourcesView.vue'),

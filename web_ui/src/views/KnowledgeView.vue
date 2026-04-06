@@ -14,10 +14,8 @@ const loadKnowledge = async () => {
   loading.value = true
   try {
     const res = await getKnowledge({ page: page.value, page_size: pageSize.value })
-    if (res.data.code === 0) {
-      items.value = res.data.data.items
-      total.value = res.data.data.total
-    }
+    items.value = res.items || []
+    total.value = res.total || 0
   } catch (error) {
     Message.error('获取知识库失败')
   } finally {
@@ -119,24 +117,32 @@ onMounted(() => {
 
 <style scoped>
 .knowledge-view {
-  padding: 16px;
+  padding: 12px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 200px;
 }
 
 .empty-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 200px;
 }
 
 .no-category {
   color: #999;
+}
+
+@media (max-width: 768px) {
+  .knowledge-view {
+    padding: 8px;
+  }
 }
 </style>

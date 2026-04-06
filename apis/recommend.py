@@ -141,6 +141,46 @@ async def interact(content_id: int, request: InteractRequest, session=Depends(ge
     return success_response({"preferences_updated": True})
 
 
+@router.get("/interactions")
+async def get_interactions(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    action: Optional[str] = None,
+    session=Depends(get_session),
+):
+    """获取交互历史"""
+    user_id = "default"
+    query = session.query(RecommendInteraction).filter(RecommendInteraction.user_id == user_id)
+    if action:
+        query = query.filter(RecommendInteraction.action == action)
+
+    total = query.count()
+    interactions = query.order_by(RecommendInteraction.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+
+    items = []
+    for i in interactions:
+        content = session.query(RecommendContent).filter(RecommendContent.id == i.content_id).first()
+        items.append({
+            "id": i.id,
+            "action": i.action,
+            "created_at": i.created_at.isoformat() if i.created_at else None,
+            "content": {
+                "id": content.id,
+                "title": content.title,
+                "url": content.url,
+                "description": content.description,
+                "source_name": content.source_name,
+            } if content else None,
+        })
+
+    return success_response({
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    })
+
+
 @router.get("/preferences")
 async def get_preferences(session=Depends(get_session)):
     """获取用户偏好"""

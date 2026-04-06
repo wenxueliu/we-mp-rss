@@ -97,6 +97,26 @@ export const interact = (contentId: number, action: 'like' | 'dislike' | 'skip' 
 }
 
 /**
+ * 获取交互历史
+ */
+export const getInteractions = (params?: { page?: number; page_size?: number; action?: string }) => {
+  return http.get<{ code: number; data: { items: InteractionItem[]; total: number } }>('/wx/recommend/interactions', { params })
+}
+
+export interface InteractionItem {
+  id: number
+  action: string
+  created_at: string
+  content: {
+    id: number
+    title: string
+    url: string
+    description?: string
+    source_name?: string
+  }
+}
+
+/**
  * 获取用户偏好
  */
 export const getPreferences = () => {
