@@ -247,6 +247,14 @@ const routes = [
           requiresAuth: true
         }
       },
+      {
+        path: 'sources',
+        name: 'Sources',
+        component: () => import('@/views/SourcesView.vue'),
+        meta: {
+          requiresAuth: true
+        }
+      },
     ]
   },
   {
