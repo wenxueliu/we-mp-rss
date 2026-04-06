@@ -11,3 +11,4 @@ from .models import (
     init_recommend_db,
 )
 from .engine import RecommenderEngine, RecommendationResult
+from .collectors import BaseCollector, RSSCollector, ContentItem
