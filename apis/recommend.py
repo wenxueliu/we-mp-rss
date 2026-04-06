@@ -85,7 +85,7 @@ async def get_contents(
             "description": c.description,
             "thumbnail": c.thumbnail,
             "author": c.author,
-            "published_at": c.published_at.isoformat() if c.published_at else None,
+            "published_at": (c.published_at or c.created_at).isoformat() if (c.published_at or c.created_at) else None,
             "tags": json.loads(c.tags) if c.tags else [],
             "recommendation_score": result.score,
             "freshness": result.freshness,

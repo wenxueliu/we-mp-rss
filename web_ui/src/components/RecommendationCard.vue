@@ -1,9 +1,6 @@
 <template>
   <a-card class="recommendation-card" :body-style="{ padding: '0px' }">
     <div class="card-content">
-      <div class="thumbnail" v-if="item.thumbnail">
-        <img :src="item.thumbnail" :alt="item.title" />
-      </div>
       <div class="info">
         <h3 class="title">{{ item.title }}</h3>
         <p class="description" v-if="item.description">{{ item.description }}</p>
@@ -66,7 +63,7 @@ const openUrl = (url: string) => {
 }
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('zh-CN')
+  return new Date(dateStr).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 </script>
 
@@ -75,22 +72,9 @@ const formatDate = (dateStr: string) => {
   margin-bottom: 12px;
 }
 .card-content {
-  display: flex;
-  flex-direction: column;
-}
-.thumbnail {
-  width: 100%;
-  max-height: 200px;
-  overflow: hidden;
-}
-.thumbnail img {
-  width: 100%;
-  height: auto;
-  max-height: 200px;
-  object-fit: cover;
+  padding: 12px;
 }
 .info {
-  padding: 12px;
   flex: 1;
 }
 .title {
@@ -143,22 +127,5 @@ const formatDate = (dateStr: string) => {
   margin-right: 0;
   flex: 1;
   min-width: 80px;
-}
-
-/* 桌面端：横排布局 */
-@media (min-width: 768px) {
-  .card-content {
-    flex-direction: row;
-  }
-  .thumbnail {
-    width: 200px;
-    flex-shrink: 0;
-    max-height: none;
-  }
-  .thumbnail img {
-    width: 200px;
-    height: 150px;
-    max-height: none;
-  }
 }
 </style>
