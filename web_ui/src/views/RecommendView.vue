@@ -20,10 +20,8 @@ const loadContents = async () => {
       page_size: pageSize.value,
       status: filterStatus.value || undefined,
     })
-    if (res.data.code === 0) {
-      contents.value = res.data.data.items
-      total.value = res.data.data.total
-    }
+    contents.value = res.items || []
+    total.value = res.total || 0
   } catch (error) {
     Message.error('获取推荐内容失败')
   } finally {

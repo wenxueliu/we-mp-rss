@@ -11,6 +11,18 @@
         </template>
         订阅管理
       </a-menu-item>
+      <a-menu-item key="/recommend">
+        <template #icon>
+          <icon-thumb-up />
+        </template>
+        推荐内容
+      </a-menu-item>
+      <a-menu-item key="/sources">
+        <template #icon>
+          <icon-link />
+        </template>
+        内容源
+      </a-menu-item>
       <a-menu-item key="/wechat-status">
         <template #icon>
           <icon-wechat />

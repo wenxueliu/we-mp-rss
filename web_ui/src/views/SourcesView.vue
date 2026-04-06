@@ -19,9 +19,7 @@ const loadSources = async () => {
   loading.value = true
   try {
     const res = await getSources()
-    if (res.data.code === 0) {
-      sources.value = res.data.data.items
-    }
+    sources.value = res.items || []
   } catch (error) {
     Message.error('获取内容源失败')
   } finally {

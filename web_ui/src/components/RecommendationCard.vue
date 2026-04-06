@@ -1,5 +1,5 @@
 <template>
-  <el-card class="recommendation-card" :body-style="{ padding: '0px' }">
+  <a-card class="recommendation-card" :body-style="{ padding: '0px' }">
     <div class="card-content">
       <div class="thumbnail" v-if="item.thumbnail">
         <img :src="item.thumbnail" :alt="item.title" />
@@ -13,29 +13,29 @@
           <span class="date" v-if="item.published_at">{{ formatDate(item.published_at) }}</span>
         </div>
         <div class="scores">
-          <el-tag type="primary">推荐 {{ item.recommendation_score }}</el-tag>
-          <el-tag type="info">新鲜 {{ item.freshness }}</el-tag>
-          <el-tag type="success">偏好 {{ item.preference_match }}</el-tag>
+          <a-tag color="arcoblue">推荐 {{ item.recommendation_score }}</a-tag>
+          <a-tag>新鲜 {{ item.freshness }}</a-tag>
+          <a-tag color="green">偏好 {{ item.preference_match }}</a-tag>
         </div>
         <p class="reason" v-if="item.reason">{{ item.reason }}</p>
         <div class="actions">
-          <el-button type="primary" size="small" @click="handleInteract('like')">
+          <a-button type="primary" size="small" @click="handleInteract('like')">
             👍 喜欢
-          </el-button>
-          <el-button type="danger" size="small" @click="handleInteract('dislike')">
+          </a-button>
+          <a-button type="danger" size="small" @click="handleInteract('dislike')">
             👎 不感兴趣
-          </el-button>
-          <el-button size="small" @click="handleInteract('skip')">⏭️ 跳过</el-button>
-          <el-button size="small" @click="openUrl(item.url)">🔗 阅读原文</el-button>
-          <el-button type="success" size="small" @click="handleSave">📚 收藏</el-button>
+          </a-button>
+          <a-button size="small" @click="handleInteract('skip')">⏭️ 跳过</a-button>
+          <a-button size="small" @click="openUrl(item.url)">🔗 阅读原文</a-button>
+          <a-button type="success" size="small" @click="handleSave">📚 收藏</a-button>
         </div>
       </div>
     </div>
-  </el-card>
+  </a-card>
 </template>
 
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
+import { Message } from '@arco-design/web-vue'
 import { interact, saveToKnowledge } from '@/api/recommend'
 import type { RecommendContent } from '@/api/recommend'
 
@@ -46,18 +46,18 @@ const props = defineProps<{
 const handleInteract = async (action: string) => {
   try {
     await interact(props.item.id, action as 'like' | 'dislike' | 'skip' | 'view')
-    ElMessage.success('已记录')
+    Message.success('已记录')
   } catch (error) {
-    ElMessage.error('操作失败')
+    Message.error('操作失败')
   }
 }
 
 const handleSave = async () => {
   try {
     await saveToKnowledge(props.item.id)
-    ElMessage.success('已收藏到知识库')
+    Message.success('已收藏到知识库')
   } catch (error) {
-    ElMessage.error('收藏失败')
+    Message.error('收藏失败')
   }
 }
 
@@ -110,7 +110,7 @@ const formatDate = (dateStr: string) => {
 .scores {
   margin-bottom: 8px;
 }
-.scores .el-tag {
+.scores .arco-tag {
   margin-right: 8px;
 }
 .reason {
@@ -118,7 +118,7 @@ const formatDate = (dateStr: string) => {
   color: #888;
   margin-bottom: 12px;
 }
-.actions .el-button {
+.actions .arco-btn {
   margin-right: 8px;
 }
 </style>
