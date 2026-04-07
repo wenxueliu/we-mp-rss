@@ -14,7 +14,6 @@
           <a-tag>新鲜 {{ item.freshness }}</a-tag>
           <a-tag color="green">偏好 {{ item.preference_match }}</a-tag>
         </div>
-        <p class="reason" v-if="item.reason">{{ item.reason }}</p>
         <div class="actions">
           <a-button type="primary" size="small" @click="handleInteract('like')">
             👍 喜欢
@@ -112,11 +111,6 @@ const formatDate = (dateStr: string) => {
 }
 .scores .arco-tag {
   margin-right: 0;
-}
-.reason {
-  font-size: 13px;
-  color: #888;
-  margin-bottom: 12px;
 }
 .actions {
   display: flex;
