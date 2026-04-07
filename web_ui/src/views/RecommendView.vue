@@ -38,6 +38,11 @@ const handleRefresh = () => {
   loadContents()
 }
 
+const handleInteract = () => {
+  // 重新加载列表（后端已过滤掉已处理的内容）
+  loadContents()
+}
+
 onMounted(() => {
   loadContents()
 })
@@ -78,6 +83,7 @@ onMounted(() => {
           v-for="item in contents"
           :key="item.id"
           :item="item"
+          @interact="handleInteract"
         />
 
         <div class="pagination-container">

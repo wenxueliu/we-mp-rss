@@ -39,10 +39,15 @@ const props = defineProps<{
   item: RecommendContent
 }>()
 
+const emit = defineEmits<{
+  (e: 'interact', action: string): void
+}>()
+
 const handleInteract = async (action: string) => {
   try {
     await interact(props.item.id, action as 'like' | 'dislike' | 'skip' | 'view')
     Message.success('已记录')
+    emit('interact', action)
   } catch (error) {
     Message.error('操作失败')
   }
