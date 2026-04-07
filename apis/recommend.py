@@ -58,7 +58,7 @@ async def get_contents(
     session=Depends(get_session),
 ):
     """获取推荐内容列表"""
-    query = session.query(RecommendContent)
+    query = session.query(RecommendContent).filter(RecommendContent.is_processed == False)
     if status:
         query = query.filter(RecommendContent.status == status)
     if source_type:
@@ -121,6 +121,9 @@ async def interact(content_id: int, request: InteractRequest, session=Depends(ge
         action=request.action,
     )
     session.add(interaction)
+
+    # 标记内容为已处理（从推荐列表隐藏）
+    content.is_processed = True
 
     # 更新偏好
     prefs = session.query(RecommendPreference).filter(RecommendPreference.user_id == user_id).first()
