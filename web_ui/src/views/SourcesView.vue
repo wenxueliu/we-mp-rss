@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { getSources, createSource, deleteSource, fetchSource } from '@/api/recommend'
+import { getSources, createSource, deleteSource, fetchSource, updateSource } from '@/api/recommend'
 import type { RecommendSource } from '@/api/recommend'
 
 const loading = ref(false)
 const sources = ref<RecommendSource[]>([])
 const showAddDialog = ref(false)
+const showEditDialog = ref(false)
+const editingId = ref<number>(0)
 const form = ref({
   name: '',
   source_type: 'rss',
@@ -14,6 +16,33 @@ const form = ref({
   enabled: true,
   fetch_interval: 24.0
 })
+
+// OpenCLI 配置选项
+const opencliPlatforms = [
+  { value: 'hackernews', label: 'HackerNews', commands: ['top', 'new', 'best', 'ask', 'show', 'job'] },
+  { value: 'reddit', label: 'Reddit', commands: ['hot', 'new', 'top', 'rising'] },
+  { value: 'bilibili', label: 'Bilibili', commands: ['hot', 'new', 'week', 'month'] },
+  { value: 'zhihu', label: '知乎', commands: ['hot', 'new'] },
+  { value: 'youtube', label: 'YouTube', commands: ['trending', 'hot'] },
+  { value: 'twitter', label: 'Twitter', commands: ['home', 'user', 'search', 'trending'] },
+  { value: 'devto', label: 'Dev.to', commands: ['top', 'recent'] },
+  { value: 'lobsters', label: 'Lobsters', commands: ['hot', 'new', 'top'] },
+  { value: 'stackoverflow', label: 'StackOverflow', commands: ['questions', 'questions tagged'] },
+]
+
+const opencliForm = ref({
+  platform: 'hackernews',
+  command: 'top',
+  limit: 10,
+})
+
+const isOpenCLI = () => form.value.source_type === 'opencli'
+
+const updateOpenCLIUrl = () => {
+  if (isOpenCLI()) {
+    form.value.url = `${opencliForm.value.platform}:${opencliForm.value.command}:${opencliForm.value.limit}`
+  }
+}
 
 const loadSources = async () => {
   loading.value = true
@@ -34,9 +63,46 @@ const handleAdd = async () => {
     showAddDialog.value = false
     loadSources()
     form.value = { name: '', source_type: 'rss', url: '', enabled: true, fetch_interval: 24.0 }
+    opencliForm.value = { platform: 'hackernews', command: 'top', limit: 10 }
   } catch (error) {
     Message.error('添加失败')
   }
+}
+
+const handleEdit = async () => {
+  try {
+    await updateSource(editingId.value, form.value)
+    Message.success('更新成功')
+    showEditDialog.value = false
+    loadSources()
+    form.value = { name: '', source_type: 'rss', url: '', enabled: true, fetch_interval: 24.0 }
+    opencliForm.value = { platform: 'hackernews', command: 'top', limit: 10 }
+  } catch (error) {
+    Message.error('更新失败')
+  }
+}
+
+const openEditDialog = (source: RecommendSource) => {
+  editingId.value = source.id
+  form.value = {
+    name: source.name,
+    source_type: source.source_type,
+    url: source.url,
+    enabled: source.enabled,
+    fetch_interval: source.fetch_interval,
+  }
+  // 解析 OpenCLI URL
+  if (source.source_type === 'opencli') {
+    const parts = source.url.split(':')
+    if (parts.length >= 3) {
+      opencliForm.value = {
+        platform: parts[0],
+        command: parts[1],
+        limit: parseInt(parts[2]) || 10,
+      }
+    }
+  }
+  showEditDialog.value = true
 }
 
 const handleFetch = async (id: number) => {
@@ -125,6 +191,7 @@ onMounted(() => {
           </div>
           <div class="source-actions">
             <a-button type="primary" size="small" @click="handleFetch(item.id)">抓取</a-button>
+            <a-button size="small" @click="openEditDialog(item)">编辑</a-button>
             <a-popconfirm content="确认删除？" @ok="handleDelete(item.id)">
               <a-button type="danger" size="small">删除</a-button>
             </a-popconfirm>
@@ -171,6 +238,9 @@ onMounted(() => {
                 <a-button type="text" size="small" @click="handleFetch(record.id)">
                   抓取
                 </a-button>
+                <a-button type="text" size="small" @click="openEditDialog(record)">
+                  编辑
+                </a-button>
                 <a-popconfirm content="确认删除？" @ok="handleDelete(record.id)">
                   <a-button type="text" status="danger" size="small">
                     删除
@@ -194,8 +264,61 @@ onMounted(() => {
             <a-option value="opencli">OpenCLI</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="URL/配置" required>
-          <a-input v-model="form.url" :placeholder="form.source_type === 'rss' ? 'RSS URL' : '如 hackernews:top:10'" />
+        <a-form-item v-if="!isOpenCLI()" label="URL/配置" required>
+          <a-input v-model="form.url" placeholder="RSS URL" />
+        </a-form-item>
+        <template v-else>
+          <a-form-item label="平台" required>
+            <a-select v-model="opencliForm.platform" @change="updateOpenCLIUrl">
+              <a-option v-for="p in opencliPlatforms" :key="p.value" :value="p.value">{{ p.label }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="内容类型" required>
+            <a-select v-model="opencliForm.command" @change="updateOpenCLIUrl">
+              <a-option v-for="cmd in opencliPlatforms.find(p => p.value === opencliForm.platform)?.commands" :key="cmd" :value="cmd">{{ cmd }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="抓取数量">
+            <a-input-number v-model="opencliForm.limit" :min="1" :max="100" @change="updateOpenCLIUrl" />
+          </a-form-item>
+        </template>
+        <a-form-item label="抓取间隔（小时）">
+          <a-input-number v-model="form.fetch_interval" :min="1" :max="168" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <a-modal v-model:visible="showEditDialog" title="编辑内容源" @ok="handleEdit" @cancel="showEditDialog = false" :width="320">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="名称" required>
+          <a-input v-model="form.name" placeholder="输入内容源名称" />
+        </a-form-item>
+        <a-form-item label="类型" required>
+          <a-select v-model="form.source_type" disabled>
+            <a-option value="rss">RSS</a-option>
+            <a-option value="opencli">OpenCLI</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item v-if="!isOpenCLI()" label="URL/配置" required>
+          <a-input v-model="form.url" placeholder="RSS URL" />
+        </a-form-item>
+        <template v-else>
+          <a-form-item label="平台" required>
+            <a-select v-model="opencliForm.platform" @change="updateOpenCLIUrl">
+              <a-option v-for="p in opencliPlatforms" :key="p.value" :value="p.value">{{ p.label }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="内容类型" required>
+            <a-select v-model="opencliForm.command" @change="updateOpenCLIUrl">
+              <a-option v-for="cmd in opencliPlatforms.find(p => p.value === opencliForm.platform)?.commands" :key="cmd" :value="cmd">{{ cmd }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="抓取数量">
+            <a-input-number v-model="opencliForm.limit" :min="1" :max="100" @change="updateOpenCLIUrl" />
+          </a-form-item>
+        </template>
+        <a-form-item label="启用状态">
+          <a-switch v-model="form.enabled" />
         </a-form-item>
         <a-form-item label="抓取间隔（小时）">
           <a-input-number v-model="form.fetch_interval" :min="1" :max="168" />
@@ -345,3 +468,6 @@ onMounted(() => {
   }
 }
 </style>
+// test
+TESTMARKER-1775779562
+UNIQUE_MARKER_12345

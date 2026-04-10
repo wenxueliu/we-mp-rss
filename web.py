@@ -30,6 +30,7 @@ import apis
 import os
 from core.config import cfg,VERSION,API_BASE
 from starlette.middleware.base import BaseHTTPMiddleware
+from core.access_log import AccessLogMiddleware
 
 class AKMiddleware(BaseHTTPMiddleware):
     """Access Key 认证中间件"""
@@ -73,6 +74,9 @@ app.add_middleware(
 
 # AK认证中间件
 app.add_middleware(AKMiddleware)
+
+# 访问日志中间件
+app.add_middleware(AccessLogMiddleware)
 
 @app.middleware("http")
 async def add_custom_header(request: Request, call_next):

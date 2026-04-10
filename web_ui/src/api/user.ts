@@ -33,12 +33,7 @@ export interface ChangePasswordParams {
 }
 
 export const changePassword = (data: ChangePasswordParams) => {
-  return http.put<{code: number, message: string}>('/wx/user/password', data, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
-  })
+  return http.put<{code: number, message: string}>('/user/password', data)
 }
 
 // 保持旧方法向后兼容
