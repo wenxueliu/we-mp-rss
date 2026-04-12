@@ -213,3 +213,67 @@ class OpenCLICollector(BaseCollector):
                 raw_data=item,
             ))
         return items
+
+
+class WechatCollector(BaseCollector):
+    """微信公众号采集器"""
+
+    def get_source_type(self) -> str:
+        return "wechat"
+
+    async def fetch(self, source_url: str) -> List[ContentItem]:
+        """
+        source_url 存储 faker_id (微信公众平台的唯一标识)
+        """
+        try:
+            from core.wx.base import WxGather
+            import asyncio
+
+            # 抓取全量文章，微信每页5篇，设置足够大的页数上限
+            # 1000页 = 5000篇文章，覆盖绝大多数公众号的全部历史
+            max_page = 1000
+
+            articles = []
+
+            def collect_callback(art):
+                articles.append(art)
+
+            wx = WxGather().Model()
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: wx.get_Articles(
+                    faker_id=source_url,
+                    Mps_id="",
+                    CallBack=collect_callback,
+                    MaxPage=max_page
+                )
+            )
+
+            return [self._parse_article(art) for art in articles if self.validate_item(self._parse_article(art))]
+
+        except Exception as e:
+            print(f"Wechat 采集错误：{e}")
+            return []
+
+    def _parse_article(self, art: dict) -> ContentItem:
+        """将 WxGather 返回的文章转换为 ContentItem"""
+        from datetime import datetime
+
+        publish_time = None
+        if art.get("publish_time"):
+            try:
+                publish_time = datetime.fromtimestamp(art["publish_time"])
+            except:
+                pass
+
+        return ContentItem(
+            title=art.get("title", ""),
+            url=art.get("url", ""),
+            description=art.get("description", "") or art.get("digest", ""),
+            author=art.get("author", ""),
+            published_at=publish_time,
+            thumbnail=art.get("pic_url", ""),
+            tags=[],
+            raw_data=art,
+        )
