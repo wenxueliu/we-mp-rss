@@ -70,7 +70,7 @@
       </template>
     </a-list>
     <template #footer>
-      <a-link href="/add-subscription" style="float:left;">
+      <a-link href="/sources" style="float:left;">
         <a-icon type="plus" />
         <span>添加订阅</span>
       </a-link>

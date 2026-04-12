@@ -132,7 +132,7 @@
       <div v-else-if="!mpHasMore && mpList.length > 0" class="mp-no-more">没有更多了</div>
     </div>
       <template #footer>
-        <a-link href="/add-subscription"  style="float:left;">
+        <a-link href="/sources"  style="float:left;">
           <a-icon type="plus" />
           <span>添加订阅</span>
         </a-link>

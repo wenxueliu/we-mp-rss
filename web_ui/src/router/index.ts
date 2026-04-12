@@ -5,7 +5,6 @@ import Login from '../views/Login.vue'
 import ArticleList from '../views/ArticleList.vue'
 import ChangePassword from '../views/ChangePassword.vue'
 import EditUser from '../views/EditUser.vue'
-import AddSubscription from '../views/AddSubscription.vue'
 import WeChatMpManagement from '../views/WeChatMpManagement.vue'
 import ConfigList from '../views/ConfigList.vue'
 import ConfigDetail from '../views/ConfigDetail.vue'
@@ -38,12 +37,6 @@ const routes = [
         path: 'edit-user',
         name: 'EditUser',
         component: EditUser,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: 'add-subscription',
-        name: 'AddSubscription',
-        component: AddSubscription,
         meta: { requiresAuth: true }
       },
       {

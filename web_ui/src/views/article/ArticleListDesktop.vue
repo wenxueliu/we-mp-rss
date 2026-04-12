@@ -901,7 +901,7 @@ const refresh = () => {
 }
 
 const showAddModal = () => {
-  router.push('/add-subscription')
+  router.push('/sources')
 }
 
 const handleAddSuccess = () => {

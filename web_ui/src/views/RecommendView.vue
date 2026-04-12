@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getContents } from '@/api/recommend'
 import type { RecommendContent } from '@/api/recommend'
@@ -11,6 +11,11 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const filterStatus = ref('')
+
+watch(filterStatus, () => {
+  page.value = 1
+  loadContents()
+})
 
 const loadContents = async () => {
   loading.value = true

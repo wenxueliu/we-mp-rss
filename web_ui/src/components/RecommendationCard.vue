@@ -1,5 +1,5 @@
 <template>
-  <a-card class="recommendation-card" :body-style="{ padding: '0px' }">
+  <a-card class="recommendation-card" :body-style="{ padding: '0px' }" @click="openUrl(item.url)">
     <div class="card-content">
       <div class="info">
         <h3 class="title">{{ item.title }}</h3>
@@ -14,7 +14,7 @@
           <a-tag>新鲜 {{ item.freshness }}</a-tag>
           <a-tag color="green">偏好 {{ item.preference_match }}</a-tag>
         </div>
-        <div class="actions">
+        <div class="actions" @click.stop>
           <a-button type="primary" size="small" @click="handleInteract('like')">
             👍 喜欢
           </a-button>
@@ -22,7 +22,6 @@
             👎 不感兴趣
           </a-button>
           <a-button size="small" @click="handleInteract('skip')">⏭️ 跳过</a-button>
-          <a-button size="small" @click="openUrl(item.url)">🔗 阅读原文</a-button>
           <a-button type="success" size="small" @click="handleSave">📚 收藏</a-button>
         </div>
       </div>

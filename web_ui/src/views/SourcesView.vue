@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getSources, createSource, deleteSource, fetchSource, updateSource } from '@/api/recommend'
+import { searchBiz } from '@/api/subscription'
 import type { RecommendSource } from '@/api/recommend'
 
 const loading = ref(false)
@@ -37,11 +38,37 @@ const opencliForm = ref({
 })
 
 const isOpenCLI = () => form.value.source_type === 'opencli'
+const isWechat = () => form.value.source_type === 'wechat'
 
 const updateOpenCLIUrl = () => {
   if (isOpenCLI()) {
     form.value.url = `${opencliForm.value.platform}:${opencliForm.value.command}:${opencliForm.value.limit}`
   }
+}
+
+// 公众号搜索
+const wechatSearchResults = ref<any[]>([])
+const wechatSearchKeyword = ref('')
+
+const searchWechatAccounts = async (keyword: string) => {
+  if (!keyword) {
+    wechatSearchResults.value = []
+    return
+  }
+  try {
+    const res = await searchBiz(keyword, { kw: keyword, offset: 0, limit: 10 })
+    wechatSearchResults.value = res.list || []
+  } catch (error) {
+    console.error('搜索公众号失败:', error)
+    wechatSearchResults.value = []
+  }
+}
+
+const selectWechatAccount = (account: any) => {
+  form.value.name = account.nickname
+  form.value.url = account.fakeid
+  wechatSearchResults.value = []
+  wechatSearchKeyword.value = ''
 }
 
 const loadSources = async () => {
@@ -64,6 +91,8 @@ const handleAdd = async () => {
     loadSources()
     form.value = { name: '', source_type: 'rss', url: '', enabled: true, fetch_interval: 24.0 }
     opencliForm.value = { platform: 'hackernews', command: 'top', limit: 10 }
+    wechatSearchKeyword.value = ''
+    wechatSearchResults.value = []
   } catch (error) {
     Message.error('添加失败')
   }
@@ -262,9 +291,34 @@ onMounted(() => {
           <a-select v-model="form.source_type">
             <a-option value="rss">RSS</a-option>
             <a-option value="opencli">OpenCLI</a-option>
+            <a-option value="wechat">公众号</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item v-if="!isOpenCLI()" label="URL/配置" required>
+        <a-form-item v-if="isWechat()" label="公众号" required>
+          <div class="wechat-search-wrapper">
+            <a-input-search
+              v-model="wechatSearchKeyword"
+              placeholder="输入公众号名称搜索"
+              search-button
+              @search="searchWechatAccounts"
+            />
+            <div v-if="wechatSearchResults.length > 0" class="wechat-search-dropdown">
+              <div
+                v-for="account in wechatSearchResults"
+                :key="account.fakeid"
+                class="wechat-result-item"
+                @click="selectWechatAccount(account)"
+              >
+                <img :src="account.round_head_img" class="wechat-avatar" />
+                <div class="wechat-info">
+                  <div class="wechat-name">{{ account.nickname }}</div>
+                  <div class="wechat-signature">{{ account.signature || '暂无简介' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a-form-item>
+        <a-form-item v-else-if="!isOpenCLI()" label="URL/配置" required>
           <a-input v-model="form.url" placeholder="RSS URL" />
         </a-form-item>
         <template v-else>
@@ -297,9 +351,13 @@ onMounted(() => {
           <a-select v-model="form.source_type" disabled>
             <a-option value="rss">RSS</a-option>
             <a-option value="opencli">OpenCLI</a-option>
+            <a-option value="wechat">公众号</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item v-if="!isOpenCLI()" label="URL/配置" required>
+        <a-form-item v-if="isWechat()" label="公众号">
+          <span>{{ form.name }}</span>
+        </a-form-item>
+        <a-form-item v-else-if="!isOpenCLI()" label="URL/配置" required>
           <a-input v-model="form.url" placeholder="RSS URL" />
         </a-form-item>
         <template v-else>
@@ -467,7 +525,72 @@ onMounted(() => {
     max-width: calc(100vw - 32px);
   }
 }
+
+.wechat-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.wechat-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--color-bg-1, #fff);
+  border: 1px solid var(--color-border, #e5e6e8);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.wechat-result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-fill-2, #f2f3f5);
+  transition: background-color 0.2s;
+}
+
+.wechat-result-item:last-child {
+  border-bottom: none;
+}
+
+.wechat-result-item:hover {
+  background-color: var(--color-fill-1, #f7f8fa);
+}
+
+.wechat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.wechat-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wechat-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--color-text-1, #1a1a1a);
+}
+
+.wechat-signature {
+  font-size: 12px;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>
-// test
-TESTMARKER-1775779562
-UNIQUE_MARKER_12345
