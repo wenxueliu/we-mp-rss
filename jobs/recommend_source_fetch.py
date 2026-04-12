@@ -4,7 +4,7 @@
 """
 from datetime import datetime
 from core.recommend.models import RecommendSource, RecommendContent
-from core.recommend.collectors import RSSCollector, OpenCLICollector
+from core.recommend.collectors import RSSCollector, OpenCLICollector, WechatCollector
 from core.recommend.engine import RecommenderEngine, calculate_content_status
 from core.db import DB
 from core.log import logger
@@ -24,6 +24,8 @@ def fetch_recommend_source(source_id: int):
             collector = RSSCollector()
         elif source.source_type == "opencli":
             collector = OpenCLICollector()
+        elif source.source_type == "wechat":
+            collector = WechatCollector()
         else:
             logger.warning(f"Unsupported source type: {source.source_type}")
             return 0
