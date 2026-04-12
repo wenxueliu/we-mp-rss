@@ -129,7 +129,9 @@ class RecommenderEngine:
         topic_weights = user_preferences.get("topic_weights", {})
         if topic_weights and hasattr(content, "tags"):
             tags = content.tags
-            if isinstance(tags, str):
+            if tags is None:
+                tags = []
+            elif isinstance(tags, str):
                 try:
                     tags = json.loads(tags)
                 except:
@@ -140,7 +142,9 @@ class RecommenderEngine:
         blocked_topics = user_preferences.get("blocked_topics", [])
         if blocked_topics and hasattr(content, "tags"):
             tags = content.tags
-            if isinstance(tags, str):
+            if tags is None:
+                tags = []
+            elif isinstance(tags, str):
                 try:
                     tags = json.loads(tags)
                 except:

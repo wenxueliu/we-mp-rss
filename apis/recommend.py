@@ -11,7 +11,8 @@ from core.recommend.models import (
     RecommendPreference, RecommendKnowledge, RecommendSourcePreset
 )
 from core.recommend.engine import RecommenderEngine, calculate_content_status
-from core.recommend.collectors import RSSCollector, OpenCLICollector, ContentItem
+from core.recommend.collectors import RSSCollector, OpenCLICollector, WechatCollector, ContentItem
+from core.queue import ContentTaskQueue
 from apis.base import success_response, error_response
 from core.auth import get_current_user
 
@@ -389,6 +390,67 @@ async def delete_source(source_id: int, session=Depends(get_session)):
     return success_response({})
 
 
+def _fetch_source_task(source_id: int, task_name: str):
+    """内容源抓取任务，运行在 ContentTaskQueue 中"""
+    session = DB.get_session()
+    try:
+        source = session.query(RecommendSource).filter(RecommendSource.id == source_id).first()
+        if not source:
+            return
+
+        # 根据类型选择采集器
+        if source.source_type == "rss":
+            collector = RSSCollector()
+        elif source.source_type == "opencli":
+            collector = OpenCLICollector()
+        elif source.source_type == "wechat":
+            collector = WechatCollector()
+        else:
+            return
+
+        import asyncio
+        items = asyncio.get_event_loop().run_until_complete(collector.fetch(source.url))
+        engine = RecommenderEngine()
+
+        for item in items:
+            existing = session.query(RecommendContent).filter(RecommendContent.url == item.url).first()
+            if existing:
+                continue
+            class TempContent:
+                def __init__(self, item):
+                    self.id = 0
+                    self.title = item.title
+                    self.url = item.url
+                    self.description = item.description
+                    self.author = item.author
+                    self.published_at = item.published_at
+                    self.thumbnail = item.thumbnail
+                    self.tags = json.dumps(item.tags) if item.tags else None
+                    self.source_name = source.name
+            temp = TempContent(item)
+            result = engine.calculate_score(temp, {})
+            status = calculate_content_status(result.score)
+            content = RecommendContent(
+                source_id=source.id,
+                source_type=source.source_type,
+                source_name=source.name,
+                title=item.title,
+                url=item.url,
+                description=item.description,
+                author=item.author,
+                published_at=item.published_at,
+                thumbnail=item.thumbnail,
+                tags=json.dumps(item.tags) if item.tags else None,
+                status=status,
+            )
+            session.add(content)
+
+        source.last_fetched_at = datetime.utcnow()
+        session.commit()
+    finally:
+        session.close()
+
+
 @router.post("/sources/{source_id}/fetch")
 async def fetch_source(source_id: int, session=Depends(get_session)):
     """手动抓取内容"""
@@ -396,54 +458,9 @@ async def fetch_source(source_id: int, session=Depends(get_session)):
     if not source:
         return error_response(404, "内容源不存在")
 
-    # 根据类型选择采集器
-    if source.source_type == "rss":
-        collector = RSSCollector()
-    elif source.source_type == "opencli":
-        collector = OpenCLICollector()
-    else:
-        return error_response(400, f"不支持的源类型: {source.source_type}")
-
-    items = await collector.fetch(source.url)
-    engine = RecommenderEngine()
-
-    for item in items:
-        existing = session.query(RecommendContent).filter(RecommendContent.url == item.url).first()
-        if existing:
-            continue
-        # 创建临时对象用于计算分数
-        class TempContent:
-            def __init__(self, item):
-                self.id = 0
-                self.title = item.title
-                self.url = item.url
-                self.description = item.description
-                self.author = item.author
-                self.published_at = item.published_at
-                self.thumbnail = item.thumbnail
-                self.tags = json.dumps(item.tags) if item.tags else None
-                self.source_name = source.name
-        temp = TempContent(item)
-        result = engine.calculate_score(temp, {})
-        status = calculate_content_status(result.score)
-        content = RecommendContent(
-            source_id=source.id,
-            source_type=source.source_type,
-            source_name=source.name,
-            title=item.title,
-            url=item.url,
-            description=item.description,
-            author=item.author,
-            published_at=item.published_at,
-            thumbnail=item.thumbnail,
-            tags=json.dumps(item.tags) if item.tags else None,
-            status=status,
-        )
-        session.add(content)
-
-    source.last_fetched_at = datetime.utcnow()
-    session.commit()
-    return success_response({"fetched": len(items)})
+    task_name = f"抓取 {source.name}"
+    ContentTaskQueue.add_task(_fetch_source_task, source_id, task_name, task_name=task_name)
+    return success_response({"message": "任务已加入队列", "source": source.name})
 
 
 @router.post("/sources/fetch-all")
@@ -457,6 +474,8 @@ async def fetch_all_sources(session=Depends(get_session)):
             collector = RSSCollector()
         elif source.source_type == "opencli":
             collector = OpenCLICollector()
+        elif source.source_type == "wechat":
+            collector = WechatCollector()
         else:
             continue
 

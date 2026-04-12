@@ -239,6 +239,18 @@ def get_feeds(task:MessageTask=None):
         mps=wx_db.get_all_mps()
      return mps
 scheduler=TaskScheduler()
+
+def add_recommend_source_fetch_job():
+    """添加内容源定时抓取任务，每10分钟检查一次"""
+    from jobs.recommend_source_fetch import check_and_fetch_sources
+    job_id = scheduler.add_cron_job(
+        check_and_fetch_sources,
+        cron_expr="0 */10 * * * *",  # 每10分钟执行
+        job_id="recommend_source_fetch",
+        tag="内容源抓取"
+    )
+    print(f"已添加内容源定时抓取任务: {job_id}")
+
 def reload_job():
     print_success("重载任务")
     scheduler.clear_all_jobs()
@@ -275,6 +287,8 @@ def start_job(job_id:str=None):
         # 修改：使用关键字参数传递 task，避免与 feeds 混淆
         job_id=scheduler.add_cron_job(add_job,cron_expr=cron_exp,kwargs={'task': task},job_id=str(task.id),tag="定时采集")
         print(f"已添加任务: {job_id}")
+    # 添加内容源定时抓取任务
+    add_recommend_source_fetch_job()
     scheduler.start()
     print("启动任务")
 def start_fix_article():

@@ -16,5 +16,5 @@ COPY . .
 COPY config.example.yaml /app/config.yaml
 RUN chmod +x /app/start.sh
 
-EXPOSE 8001
+EXPOSE 25808
 CMD ["/app/start.sh"]
