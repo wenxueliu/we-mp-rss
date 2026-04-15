@@ -30,15 +30,9 @@ def fetch_recommend_source(source_id: int):
             logger.warning(f"Unsupported source type: {source.source_type}")
             return 0
 
-        # 同步执行采集（注意：实际项目中可能是异步）
+        # 同步执行采集
         import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        items = loop.run_until_complete(collector.fetch(source.url))
+        items = asyncio.run(collector.fetch(source.url))
         engine = RecommenderEngine()
 
         new_count = 0

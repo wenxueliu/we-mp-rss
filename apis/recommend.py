@@ -409,7 +409,12 @@ def _fetch_source_task(source_id: int, task_name: str):
             return
 
         import asyncio
-        items = asyncio.get_event_loop().run_until_complete(collector.fetch(source.url))
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        items = loop.run_until_complete(collector.fetch(source.url))
         engine = RecommenderEngine()
 
         for item in items:

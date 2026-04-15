@@ -550,9 +550,9 @@ class PlaywrightController:
             # 析构函数中避免抛出异常
             pass
 
-    def open_url(self, url,wait_until="domcontentloaded"):
+    def open_url(self, url, wait_until="domcontentloaded", timeout=60000):
         try:
-            self.page.goto(url,wait_until=wait_until)
+            self.page.goto(url, wait_until=wait_until, timeout=timeout)
         except Exception as e:
             raise Exception(f"打开URL失败: {str(e)}")
 

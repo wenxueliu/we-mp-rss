@@ -275,18 +275,18 @@ def start_job(job_id:str=None):
     from .taskmsg import get_message_task
     tasks=get_message_task(job_id)
     if not tasks:
-        print("没有任务")
-        return
-    tag="定时采集"
-    for task in tasks:
-        cron_exp=task.cron_exp
-        if not cron_exp:
-            print_error(f"任务[{task.id}]没有设置cron表达式")
-            continue
+        print("没有其他定时任务")
+    else:
+        tag="定时采集"
+        for task in tasks:
+            cron_exp=task.cron_exp
+            if not cron_exp:
+                print_error(f"任务[{task.id}]没有设置cron表达式")
+                continue
 
-        # 修改：使用关键字参数传递 task，避免与 feeds 混淆
-        job_id=scheduler.add_cron_job(add_job,cron_expr=cron_exp,kwargs={'task': task},job_id=str(task.id),tag="定时采集")
-        print(f"已添加任务: {job_id}")
+            # 修改：使用关键字参数传递 task，避免与 feeds 混淆
+            job_id=scheduler.add_cron_job(add_job,cron_expr=cron_exp,kwargs={'task': task},job_id=str(task.id),tag="定时采集")
+            print(f"已添加任务: {job_id}")
     # 添加内容源定时抓取任务
     add_recommend_source_fetch_job()
     scheduler.start()
@@ -297,5 +297,5 @@ def start_fix_article():
     start_sync_content()
 if __name__ == '__main__':
     # do_job()
-    # start_all_task()
+    start_all_task()
     pass
