@@ -1,4 +1,9 @@
-/* 全局样式 */
+/* ============================================
+   EXPO-INSPIRED DESIGN SYSTEM
+   WeChat RSS Reader
+   ============================================ */
+
+/* Global Reset */
 * {
   margin: 0;
   padding: 0;
@@ -8,20 +13,23 @@
 html, body {
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #f0f0f3;
+  color: #1c2024;
 }
 
 #app {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  background: #f0f0f3;
 }
 
-/* 链接样式 */
+/* Links */
 a {
-  color: #165DFF;
+  color: #0d74ce;
   text-decoration: none;
 }
 
@@ -29,198 +37,515 @@ a:hover {
   text-decoration: underline;
 }
 
-/* 自定义ArcoDesign主题变量 */
+/* ============================================
+   DESIGN TOKENS
+   ============================================ */
 :root {
-  --primary-color: #165DFF;
+  /* Primary */
+  --expo-black: #000000;
+  --near-black: #1c2024;
+
+  /* Links & Accents */
+  --link-cobalt: #0d74ce;
+  --legal-blue: #476cff;
+  --widget-sky: #47c2ff;
+  --preview-purple: #8145b5;
+
+  /* Surfaces */
+  --cloud-gray: #f0f0f3;
+  --pure-white: #ffffff;
+  --widget-dark: #1a1a1a;
+  --banner-dark: #171717;
+
+  /* Neutrals */
+  --slate-gray: #60646c;
+  --mid-slate: #555860;
+  --silver: #b0b4ba;
+  --pewter: #999999;
+  --light-silver: #cccccc;
+  --dark-slate: #363a3f;
+  --charcoal: #333333;
+
+  /* Semantic */
+  --warning-amber: #ab6400;
+  --destructive-rose: #eb8e90;
+  --border-lavender: #e0e1e6;
+  --input-border: #d9d9e0;
+  --dark-focus-ring: #2547d0;
   --success-color: #00B42A;
   --warning-color: #FF7D00;
   --danger-color: #F53F3F;
+
+  /* Elevation Shadows - Whisper Soft */
+  --shadow-whisper: 0px 3px 6px rgba(0,0,0,0.08), 0px 2px 4px rgba(0,0,0,0.07);
+  --shadow-elevated: 0px 10px 20px rgba(0,0,0,0.1), 0px 3px 6px rgba(0,0,0,0.05);
+
+  /* Spacing Scale */
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-96: 96px;
+
+  /* Border Radius Scale */
+  --radius-squared: 4px;
+  --radius-subtle: 6px;
+  --radius-comfortable: 8px;
+  --radius-generous: 16px;
+  --radius-very-rounded: 24px;
+  --radius-highly-rounded: 32px;
+  --radius-pill: 9999px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Legacy Arco Variables (for compatibility) */
+  --primary-color: #0d74ce;
+  --color-text-1: #1c2024;
+  --color-text-2: #60646c;
+  --color-text-3: #555860;
+  --color-text-4: #b0b4ba;
+  --color-bg-1: #f0f0f3;
+  --color-bg-2: #ffffff;
+  --color-bg-3: #f7f8fa;
+  --color-bg-4: #ebedf0;
+  --color-border: #e0e1e6;
+  --color-border-2: #d9d9e0;
+  --color-fill-1: #f7f8fa;
+  --color-fill-2: #f2f3f5;
+  --color-fill-3: #e5e6eb;
+  --color-fill-4: #c9c9ce;
+  --color-link: #0d74ce;
+  --color-link-hover: #0a5fb8;
+  --color-success: #00B42A;
+  --color-warning: #FF7D00;
+  --color-danger: #F53F3F;
+  --color-info: #168af0;
+  --color-primary-light-1: #e8f1ff;
+  --color-primary-light-2: #d6e6ff;
+  --color-primary-light-3: #c4dbff;
 }
 
-/* ========== 设计系统变量 ========== */
-:root {
-  /* 间距系统 */
-  --space-xxs: 0.25rem;
-  --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-xxl: 3rem;
+/* ============================================
+   EXPO-STYLE COMPONENTS
+   ============================================ */
 
-  /* 响应式断点 */
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-
-  /* 颜色层次 */
-  --color-primary-light: #e8f1ff;
-  --color-primary-lighter: #f5f8ff;
-  --color-text-primary: #1d2129;
-  --color-text-secondary: #4e5969;
-  --color-text-tertiary: #86909c;
-  --color-bg-light: #f7f8fa;
-  --color-border-light: #f2f3f5;
+/* Page Section - Gallery-like spacing */
+.page-section {
+  padding: var(--space-96) 0;
 }
 
-/* ========== 新增美化样式 ========== */
-/* 响应式容器 */
+/* Expo Card - White surface on Cloud Gray */
+.card-expo {
+  background: var(--pure-white);
+  border: 1px solid var(--border-lavender);
+  border-radius: var(--radius-comfortable);
+  box-shadow: var(--shadow-whisper);
+  padding: var(--space-24);
+  transition: box-shadow 0.2s ease;
+}
+
+.card-expo:hover {
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Headline Display - Massive typography */
+.headline-display {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.10;
+  letter-spacing: -3px;
+  color: var(--expo-black);
+}
+
+.headline-section {
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1.10;
+  letter-spacing: -2px;
+  color: var(--expo-black);
+}
+
+.headline-card {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.20;
+  letter-spacing: -0.25px;
+  color: var(--near-black);
+}
+
+.text-body-large {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.40;
+  color: var(--slate-gray);
+}
+
+.text-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.40;
+  color: var(--near-black);
+}
+
+.text-caption {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.40;
+  color: var(--slate-gray);
+}
+
+.text-small {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.00;
+  color: var(--silver);
+}
+
+/* Pill Button - Primary */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  background: var(--pure-white);
+  color: var(--near-black);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-whisper);
+}
+
+.btn-pill:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-1px);
+}
+
+/* Pill Button - Dark (Primary CTA) */
+.btn-pill-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  background: var(--expo-black);
+  color: var(--pure-white);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pill-dark:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Pill Button - Primary Color */
+.btn-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  background: var(--link-cobalt);
+  color: var(--pure-white);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pill-primary:hover {
+  background: #0a5fb8;
+  transform: translateY(-1px);
+}
+
+/* Status Badge Pill */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-12);
+  background: var(--pure-white);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-pill .badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success-color);
+}
+
+.badge-pill .badge-dot.warning {
+  background: var(--warning-amber);
+}
+
+.badge-pill .badge-dot.danger {
+  background: var(--danger-color);
+}
+
+/* Input Field - Expo Style */
+.input-expo {
+  padding: var(--space-8) var(--space-12);
+  background: var(--pure-white);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-subtle);
+  font-size: 14px;
+  color: var(--near-black);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-expo:focus {
+  border-color: var(--link-cobalt);
+  box-shadow: 0 0 0 3px rgba(13, 116, 206, 0.1);
+}
+
+.input-expo::placeholder {
+  color: var(--silver);
+}
+
+/* ============================================
+   RESPONSIVE CONTAINER
+   ============================================ */
 .container {
   width: 100%;
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-16);
   margin: 0 auto;
 }
-@media (min-width: 576px) {
+
+@media (min-width: 640px) {
   .container {
-    max-width: 540px;
-  }
-}
-@media screen and (max-width:768px) {
- .arco-modal{
-  width:80% !important;
- }
-}
-@media (min-width: 768px) {
-  .container {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .container {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .container {
-    max-width: 1140px;
+    max-width: 640px;
   }
 }
 
-/* 页面过渡动画 */
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* ============================================
+   PAGE TRANSITIONS
+   ============================================ */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
 }
 
-/* 按钮悬停效果 */
-.button-hover {
-  transition: all 0.2s ease;
-}
-.button-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* 卡片动画 */
-.card {
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-/* 加载动画 */
+/* ============================================
+   LOADING ANIMATION
+   ============================================ */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
 .loading-spinner {
   animation: spin 1s linear infinite;
 }
 
-/* 增强卡片样式 */
-.enhanced-card {
-  background: white;
-  border-radius: 12px;
-  padding: var(--space-lg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid var(--color-border-light);
-}
-.enhanced-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-/* 增强按钮样式 */
-.enhanced-button {
-  padding: var(--space-sm) var(--space-md);
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border: none;
-  cursor: pointer;
-}
-.enhanced-button--primary {
-  background: var(--primary-color);
-  color: white;
-}
-.enhanced-button--primary:hover {
-  background: #0e4acc;
-  box-shadow: 0 2px 8px rgba(22, 93, 255, 0.3);
-}
-
-/* 增强表单元素 */
-.enhanced-input {
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border-light);
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-.enhanced-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
-  outline: none;
-}
-
-/* 文字渐变效果 */
-.text-gradient {
-  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* 输入框焦点效果 */
-.input-focus:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-/* 表格行悬停效果 */
-.table-row:hover {
-  background-color: rgba(22, 93, 255, 0.05);
-  transition: background-color 0.2s ease;
-}
-
-/* 淡入动画 */
+/* ============================================
+   FADE IN ANIMATION
+   ============================================ */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
 .fade-in {
-  animation: fadeIn 0.5s ease forwards;
+  animation: fadeIn 0.4s ease forwards;
 }
 
+/* ============================================
+   LEGACY COMPATIBILITY
+   ============================================ */
 
-#translate{
-    display: none !important;
-    position: fixed;
-    top: 105px;
-    right: 40px;
-    z-index: 1000;
+/* Spacing utilities */
+.space-xs { margin: var(--space-4); }
+.space-sm { margin: var(--space-8); }
+.space-md { margin: var(--space-16); }
+.space-lg { margin: var(--space-24); }
+.space-xl { margin: var(--space-32); }
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-8 { gap: var(--space-8); }
+.gap-16 { gap: var(--space-16); }
+.gap-24 { gap: var(--space-24); }
+
+/* Grid */
+.grid { display: grid; }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* ============================================
+   ARCO DESIGN OVERRIDES
+   ============================================ */
+
+/* Page header styling */
+.arco-page-header {
+  background: transparent !important;
+  padding: var(--space-48) 0 var(--space-24) 0 !important;
 }
-@media screen and (max-width:768px) {
-#translate{
+
+.arco-page-header-title {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -1px !important;
+  color: var(--expo-black) !important;
+}
+
+.arco-page-header-subtitle {
+  font-size: 16px !important;
+  color: var(--slate-gray) !important;
+}
+
+/* Card overrides */
+.arco-card {
+  border-radius: var(--radius-comfortable) !important;
+  border-color: var(--border-lavender) !important;
+}
+
+.arco-card-header {
+  border-bottom-color: var(--border-lavender) !important;
+}
+
+/* Button overrides for pill shape */
+.arco-btn {
+  border-radius: var(--radius-subtle) !important;
+}
+
+.arco-btn-primary {
+  background: var(--link-cobalt) !important;
+  border-color: var(--link-cobalt) !important;
+}
+
+/* Input overrides */
+.arco-input {
+  border-radius: var(--radius-subtle) !important;
+  border-color: var(--input-border) !important;
+}
+
+.arco-input:focus,
+.arco-input-wrapper-focus {
+  border-color: var(--link-cobalt) !important;
+  box-shadow: 0 0 0 3px rgba(13, 116, 206, 0.1) !important;
+}
+
+/* Table overrides */
+.arco-table {
+  border-radius: var(--radius-comfortable) !important;
+  overflow: hidden;
+}
+
+.arco-table-th {
+  background: var(--cloud-gray) !important;
+  color: var(--slate-gray) !important;
+  font-weight: 600 !important;
+}
+
+.arco-table-tr:hover .arco-table-td {
+  background: rgba(13, 116, 206, 0.03) !important;
+}
+
+/* Modal overrides */
+.arco-modal {
+  border-radius: var(--radius-generous) !important;
+}
+
+.arco-modal-header {
+  border-bottom-color: var(--border-lavender) !important;
+}
+
+/* Tag overrides */
+.arco-tag {
+  border-radius: var(--radius-pill) !important;
+  padding: 2px var(--space-8) !important;
+}
+
+/* ============================================
+   MOBILE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .headline-display {
+    font-size: 36px;
+    letter-spacing: -1.5px;
+  }
+
+  .headline-section {
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+
+  .card-expo {
+    padding: var(--space-16);
+  }
+
+  .page-section {
+    padding: var(--space-48) 0;
+  }
+}
+
+/* ============================================
+   TRANSLATE WIDGET HIDE
+   ============================================ */
+#translate {
+  display: none !important;
+  position: fixed;
+  top: 105px;
+  right: 40px;
+  z-index: 1000;
+}
+
+@media screen and (max-width: 768px) {
+  #translate {
     position: fixed;
     top: 135px;
     left: 44px;
-}
+  }
 }

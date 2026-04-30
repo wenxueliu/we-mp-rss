@@ -1,100 +1,123 @@
 <template>
-  <a-page-header title="系统信息" :sub-title="`版本: ${sysInfo.version}`">
-    <a-card :bordered="false" class="sys-info-card" title="系统资源">
-       <SystemResources :resources="sysInfo.resources" />
-    </a-card>
-    <a-card :bordered="false" class="sys-info-card" title="文章统计">
-      <a-descriptions bordered :column="{ xs: 1, sm: 1, md: 1, lg: 2 }">
-         <a-descriptions-item label="公众号总数">
-          <template #label> <desktop-outlined /> 公众号总数 </template>
-          {{ sysInfo.article?.mp_all_count || 0 }}
-        </a-descriptions-item>
-        <a-descriptions-item label="文章总数">
-          <template #label> <desktop-outlined /> 文章总数 </template>
-          {{ sysInfo.article?.all_count || 0 }}
-        </a-descriptions-item>
-        <a-descriptions-item label="无正文数量">
-          <template #label> <desktop-outlined /> 无正文数量 </template>
-          {{ sysInfo.article?.no_content_count || 0 }}
-        </a-descriptions-item>
-        <a-descriptions-item label="有正文数量">
-          <template #label> <desktop-outlined /> 有正文数量 </template>
-          {{ sysInfo.article?.has_content_count || 0 }}
-        </a-descriptions-item>
-        <a-descriptions-item label="已删除">
-          <template #label> <desktop-outlined /> 已删除 </template>
-          {{ sysInfo.article?.wrong_count || 0 }}
-        </a-descriptions-item>
-      </a-descriptions>
-    </a-card>
-    <a-card :bordered="false" class="sys-info-card" title="系统信息">
-      <a-descriptions bordered :column="{ xs: 1, sm: 1, md: 1, lg: 2 }">
-        <a-descriptions-item label="操作系统">
-          <template #label> <desktop-outlined /> 操作系统 </template>
-          {{ sysInfo.os.name }}
-        </a-descriptions-item>
-        <a-descriptions-item label="Docker版本">
-          <template #label> <desktop-outlined /> Docker版本 </template>
-          {{ sysInfo.os.docker_version }}
-        </a-descriptions-item>
-        <a-descriptions-item label="系统版本">
-          <template #label> <code-outlined /> 系统版本 </template>
-          {{ sysInfo.os.version }} ({{ sysInfo.os.release }})
-        </a-descriptions-item>
-        <a-descriptions-item label="Python版本">
-          <template #label> <code-outlined /> Python版本 </template>
-          {{ sysInfo.python_version }}
-        </a-descriptions-item>
-        <a-descriptions-item label="运行时间">
-          <template #label> <clock-circle-outlined /> 运行时间 </template>
-          {{ formatUptime(sysInfo.uptime) }}
-        </a-descriptions-item>
-        <a-descriptions-item label="系统架构">
-          <template #label> <deployment-unit-outlined /> 系统架构 </template>
-          {{ sysInfo.system.node }} / {{ sysInfo.system.machine }} ({{
-            sysInfo.system.processor
-          }})
-        </a-descriptions-item>
-        <a-descriptions-item label="TOKEN">
-          <template #label> <api-outlined /> TOKEN </template>
-          {{ sysInfo.wx.token }}
-        </a-descriptions-item>
-        <a-descriptions-item label="过期时间">
-          <template #label> <api-outlined /> 过期时间 </template>
-          {{ !sysInfo.wx.login? '未登录': sysInfo.wx.expiry_time }}
-        </a-descriptions-item>
-        <a-descriptions-item label="API版本">
-          <template #label> <api-outlined /> API版本 </template>
-          {{ sysInfo.api_version }}
-        </a-descriptions-item>
-        <a-descriptions-item label="队列状态">
-          <template #label> <api-outlined /> 队列状态 </template>
-          {{ sysInfo.queue.is_running || false }}
-        </a-descriptions-item>
-        <a-descriptions-item label="队列数量">
-          <template #label> <api-outlined /> 挂起队列数量 </template>
-          {{ sysInfo.queue.pending_tasks || 0 }}
-        </a-descriptions-item>
-        <a-descriptions-item label="核心版本">
-          <template #label> <appstore-outlined /> 核心版本 </template>
-          {{ sysInfo.core_version }}
-        </a-descriptions-item>
-        <a-descriptions-item label="最新版本">
-          <template #label> <cloud-download-outlined /> 最新版本 </template>
-          {{ sysInfo.latest_version }}
-          <!-- 添加点击事件 -->
-          <a-button
-            v-if="sysInfo.need_update"
-            type="text"
-            size="small"
-            style="margin-left: 8px"
-            @click="openUpdateLink"
-            >立即更新</a-button
-          >
-        </a-descriptions-item>
-      </a-descriptions>
-    </a-card>
-  </a-page-header>
+  <div class="sys-info-page">
+    <!-- Expo-style Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="headline-section">系统信息</h1>
+        <p class="text-body-large">版本 {{ sysInfo.version }}</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-pill">
+          <span class="badge-dot" :class="{ warning: !sysInfo.queue?.is_running }"></span>
+          {{ sysInfo.queue?.is_running ? '队列运行中' : '队列已停止' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- System Resources Card -->
+    <div class="card-expo page-section">
+      <div class="card-header">
+        <h2 class="headline-card">系统资源</h2>
+      </div>
+      <div class="card-body">
+        <SystemResources :resources="sysInfo.resources" />
+      </div>
+    </div>
+
+    <!-- Article Statistics Card -->
+    <div class="card-expo page-section">
+      <div class="card-header">
+        <h2 class="headline-card">文章统计</h2>
+      </div>
+      <div class="card-body">
+        <a-descriptions :column="{ xs: 1, sm: 2, md: 2, lg: 3 }" :bordered="false" class="expo-descriptions">
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">公众号总数</span>
+            <span class="desc-value">{{ sysInfo.article?.mp_all_count || 0 }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">文章总数</span>
+            <span class="desc-value">{{ sysInfo.article?.all_count || 0 }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">无正文数量</span>
+            <span class="desc-value">{{ sysInfo.article?.no_content_count || 0 }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">有正文数量</span>
+            <span class="desc-value">{{ sysInfo.article?.has_content_count || 0 }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">已删除</span>
+            <span class="desc-value">{{ sysInfo.article?.wrong_count || 0 }}</span>
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+    </div>
+
+    <!-- System Info Card -->
+    <div class="card-expo page-section">
+      <div class="card-header">
+        <h2 class="headline-card">系统详情</h2>
+      </div>
+      <div class="card-body">
+        <a-descriptions :column="{ xs: 1, sm: 1, md: 2, lg: 2 }" :bordered="false" class="expo-descriptions">
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">操作系统</span>
+            <span class="desc-value">{{ sysInfo.os.name }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">Docker版本</span>
+            <span class="desc-value">{{ sysInfo.os.docker_version }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">系统版本</span>
+            <span class="desc-value">{{ sysInfo.os.version }} ({{ sysInfo.os.release }})</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">Python版本</span>
+            <span class="desc-value">{{ sysInfo.python_version }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">运行时间</span>
+            <span class="desc-value">{{ formatUptime(sysInfo.uptime) }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">系统架构</span>
+            <span class="desc-value">{{ sysInfo.system.node }} / {{ sysInfo.system.machine }} ({{ sysInfo.system.processor }})</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">TOKEN</span>
+            <span class="desc-value mono">{{ sysInfo.wx.token }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">过期时间</span>
+            <span class="desc-value">{{ !sysInfo.wx.login ? '未登录' : sysInfo.wx.expiry_time }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">API版本</span>
+            <span class="desc-value">{{ sysInfo.api_version }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">队列状态</span>
+            <span class="desc-value">{{ sysInfo.queue.is_running || false ? '运行中' : '已停止' }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">挂起队列数量</span>
+            <span class="desc-value">{{ sysInfo.queue.pending_tasks || 0 }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">核心版本</span>
+            <span class="desc-value">{{ sysInfo.core_version }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item class="desc-item">
+            <span class="desc-label">最新版本</span>
+            <span class="desc-value">{{ sysInfo.latest_version }}</span>
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -104,30 +127,16 @@ import type { SysInfo } from "@/api/sysInfo";
 import SystemResources from "@/components/SystemResources.vue";
 
 const sysInfo = ref<SysInfo>({
-  os: {
-    name: "",
-    version: "",
-    release: "",
-  },
+  os: { name: "", version: "", release: "" },
   python_version: "",
   uptime: 0,
-  system: {
-    node: "",
-    machine: "",
-    processor: "",
-  },
+  system: { node: "", machine: "", processor: "" },
   api_version: "/api/v1/wx",
   core_version: "",
   latest_version: "",
   need_update: true,
-  wx: {
-    token: "",
-    expiry_time: "",
-  },
-  queue: {
-    is_running: false,
-    pending_tasks: 0,
-  },
+  wx: { token: "", expiry_time: "" },
+  queue: { is_running: false, pending_tasks: 0 },
 });
 
 const formatUptime = (seconds: number): string => {
@@ -137,59 +146,110 @@ const formatUptime = (seconds: number): string => {
   return `${days}天 ${hours}小时 ${minutes}分钟`;
 };
 
-// 定义打开链接的函数
-const openUpdateLink = () => {
-  window.open("https://github.com/rachelos/we-mp-rss", "_blank");
-};
-
 onMounted(async () => {
   sysInfo.value = await getSysInfo()
 });
 </script>
 
 <style scoped>
-.sys-info-container {
-  margin-top: 16px;
+.sys-info-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
 }
 
-.sys-info-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s ease;
-  background: var(--color-bg-2);
-  height: 100%;
-}
-
-.sys-info-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
-  transform: translateY(-2px);
-}
-
-.sys-info-card :deep(.ant-card-head) {
-  border-bottom: none;
-}
-
-.sys-info-card :deep(.ant-descriptions-item-label) {
+/* Page Header - Expo Style */
+.page-header {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border-lavender);
+}
+
+.header-content .headline-section {
+  margin-bottom: 8px;
+}
+
+.header-badge {
+  margin-top: 8px;
+}
+
+/* Card Expo Override for this page */
+.card-expo {
+  margin-bottom: 0;
+}
+
+.page-section {
+  margin-bottom: 48px;
+}
+
+.card-header {
+  margin-bottom: 24px;
+}
+
+.card-header .headline-card {
+  color: var(--near-black);
+}
+
+.card-body {
+  color: var(--slate-gray);
+}
+
+/* Expo Descriptions */
+.expo-descriptions {
+  display: grid;
+  gap: 24px;
+}
+
+:deep(.arco-descriptions-item) {
+  padding-bottom: 0 !important;
+}
+
+.desc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.desc-label {
+  font-size: 12px;
   font-weight: 500;
+  color: var(--silver);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.sys-info-card :deep(.ant-descriptions-item-content) {
-  color: var(--color-text-1);
-}
-
-.sys-info-card :deep(.anticon) {
+.desc-value {
   font-size: 16px;
+  font-weight: 500;
+  color: var(--near-black);
 }
 
-.sys-info-card :deep(.ant-descriptions-row) {
-  padding: 12px 0;
+.desc-value.mono {
+  font-family: var(--font-mono);
+  font-size: 14px;
 }
 
-.sys-info-card :deep(.ant-descriptions-item) {
-  padding-bottom: 0;
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sys-info-page {
+    padding: 24px 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-section {
+    margin-bottom: 32px;
+  }
+
+  .headline-section {
+    font-size: 32px !important;
+    letter-spacing: -1.5px !important;
+  }
 }
 </style>

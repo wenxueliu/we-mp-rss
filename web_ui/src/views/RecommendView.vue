@@ -109,30 +109,54 @@ onMounted(() => {
 
 <style scoped>
 .recommend-view {
-  padding: 12px;
-  max-width: 100%;
+  padding: 48px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
   overflow-x: hidden;
+  background: var(--cloud-gray);
+  min-height: 100vh;
 }
 
+/* Expo Page Header */
 .page-header {
-  padding: 12px 16px;
-  margin-bottom: 12px;
+  padding: 0 0 32px 0;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border-lavender);
 }
 
 .page-header :deep(.arco-page-header-title) {
-  font-size: 18px;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: var(--expo-black) !important;
+  letter-spacing: -1px;
 }
 
 .page-header :deep(.arco-page-header-subtitle) {
-  font-size: 13px;
+  font-size: 16px !important;
+  color: var(--slate-gray) !important;
+}
+
+.page-header :deep(.arco-page-header-wrapper) {
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .header-actions {
-  width: 100%;
+  width: auto;
 }
 
+.header-actions :deep(.arco-select-view),
+.header-actions :deep(.arco-btn) {
+  border-radius: var(--radius-pill) !important;
+}
+
+/* Expo Card */
 .content-card {
-  border-radius: 8px;
+  border-radius: var(--radius-comfortable) !important;
+  border: 1px solid var(--border-lavender) !important;
+  box-shadow: var(--shadow-whisper);
+  background: var(--pure-white);
+  padding: 24px;
 }
 
 .loading-container {
@@ -152,23 +176,27 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 32px;
   overflow-x: auto;
+}
+
+.pagination-container :deep(.arco-pagination) {
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
   .recommend-view {
-    padding: 8px;
+    padding: 24px 16px;
   }
 
   .page-header {
-    padding: 8px 12px;
-    margin-bottom: 8px;
+    padding: 0 0 24px 0;
+    margin-bottom: 24px;
   }
 
   .page-header :deep(.arco-page-header-wrapper) {
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
   }
 
   .header-actions {
@@ -180,6 +208,10 @@ onMounted(() => {
   .header-actions .arco-space {
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .content-card {
+    padding: 16px;
   }
 }
 </style>

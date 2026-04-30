@@ -347,17 +347,30 @@ watch(
 <style scoped>
 .app-container {
   min-height: 100vh;
+  background: var(--cloud-gray);
 }
 
+.app-layout {
+  background: var(--cloud-gray);
+  min-height: 100vh;
+}
+
+.content-layout {
+  background: var(--cloud-gray);
+}
 
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   height: 64px;
-  background: var(--color-bg-2);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--pure-white);
+  border-bottom: 1px solid var(--border-lavender);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-left {
@@ -369,13 +382,18 @@ watch(
   display: flex;
   align-items: center;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--near-black);
+}
+
+.logo img {
+  border-radius: var(--radius-comfortable);
 }
 
 .logo svg {
   margin-right: 10px;
   font-size: 24px;
-  color: var(--primary-color);
+  color: var(--slate-gray);
 }
 
 .header-right {
@@ -387,15 +405,23 @@ watch(
   display: flex;
   align-items: center;
   cursor: pointer;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  transition: background 0.2s ease;
+}
+
+.user-info:hover {
+  background: var(--cloud-gray);
 }
 
 .username {
   margin-left: 10px;
+  font-weight: 500;
+  color: var(--near-black);
 }
 
 .app-content {
-  /* padding: 20px; */
-  background: var(--color-bg-1);
+  background: var(--cloud-gray);
   min-height: calc(100vh - 64px);
 }
 
@@ -426,13 +452,28 @@ watch(
   margin-bottom: 20px;
 }
 
+.wx-account-avatar {
+  border-radius: var(--radius-generous);
+}
+
 .wx-account-name {
   margin-top: 12px;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--near-black);
 }
 
 .wx-account-empty {
   padding: 40px 0;
+}
+
+/* Expo-style language select */
+:deep(.arco-select-view-single) {
+  border-radius: var(--radius-pill) !important;
+  border-color: var(--input-border) !important;
+}
+
+:deep(.arco-select-view-value) {
+  color: var(--near-black) !important;
 }
 </style>

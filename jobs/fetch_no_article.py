@@ -101,7 +101,23 @@ def start_sync_content():
     # ContentTaskQueue.clear_queue()  # 已注释：避免清空消息任务队列
     scheduler.clear_all_jobs()
     def do_sync():
-        ContentTaskQueue.add_task(fetch_articles_without_content, task_name="补抓文章内容")
+        session = DB.get_session()
+        try:
+            from sqlalchemy import or_
+            articles = session.query(Article).filter(
+                or_(Article.content.is_(None), Article.content == ""),
+                Article.status != DATA_STATUS.FETCHING,
+                Article.status != DATA_STATUS.DELETED
+            ).limit(10).all()
+            count = len(articles)
+            if count > 0:
+                first_title = articles[0].title[:20] if articles[0].title else "未知"
+                task_name = f"补抓: {first_title}... ({count}条)"
+            else:
+                task_name = "补抓文章内容"
+        finally:
+            session.close()
+        ContentTaskQueue.add_task(fetch_articles_without_content, task_name=task_name)
     job_id=scheduler.add_cron_job(do_sync,cron_expr=cron_exp)
     print_success(f"已添自动同步文章内容任务: {job_id}")
     scheduler.start()

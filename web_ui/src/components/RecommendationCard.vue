@@ -72,58 +72,92 @@ const formatDate = (dateStr: string) => {
 
 <style scoped>
 .recommendation-card {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  background: var(--pure-white);
+  border: 1px solid var(--border-lavender);
+  border-radius: var(--radius-comfortable);
+  box-shadow: var(--shadow-whisper);
+  transition: all 0.2s ease;
 }
+
+.recommendation-card:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+}
+
 .card-content {
-  padding: 12px;
+  padding: 20px;
 }
+
 .info {
   flex: 1;
 }
+
 .title {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
   line-height: 1.4;
   word-break: break-all;
+  color: var(--near-black);
+  letter-spacing: -0.25px;
 }
+
 .description {
-  color: #666;
+  color: var(--slate-gray);
   font-size: 14px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  line-height: 1.5;
 }
+
 .meta {
   font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
+  color: var(--silver);
+  margin-bottom: 12px;
   flex-wrap: wrap;
+  display: flex;
+  gap: 12px;
 }
+
 .meta span {
-  margin-right: 12px;
   margin-bottom: 4px;
   display: inline-block;
 }
+
 .scores {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
+
 .scores .arco-tag {
   margin-right: 0;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 500;
 }
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .actions .arco-btn {
   margin-right: 0;
   flex: 1;
   min-width: 80px;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.actions .arco-btn:hover {
+  transform: translateY(-1px);
 }
 </style>

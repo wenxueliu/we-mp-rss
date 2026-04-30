@@ -37,6 +37,10 @@ http.interceptors.response.use(
       router.push("/login")
       return Promise.reject("未登录或登录已过期，请重新登录。")
     }
+    // 对于没有 code 字段的响应（如登录响应），直接返回
+    if (response.data && !('code' in response.data)) {
+      return response.data
+    }
     const data=response.data?.detail||response.data
     const errorMsg = data?.message || '请求失败'
     if(response.headers['content-type']==='application/json') {

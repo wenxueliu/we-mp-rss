@@ -24,12 +24,11 @@
 </template>
 
 <script>
-import { DashboardOutlined } from '@ant-design/icons-vue';
 import CustomPieChart from './CustomPieChart.vue';
 import { getSysResources } from '@/api/sysInfo';
 
 export default {
-  components: { DashboardOutlined, CustomPieChart },
+  components: { CustomPieChart },
   data() {
     return {
       resources: {
@@ -83,29 +82,36 @@ export default {
 </script>
 
 <style scoped>
-.sys-info-card {
-  margin-bottom: 16px;
-}
 .resource-charts {
   display: flex;
   justify-content: space-around;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 32px;
+  padding: 16px 0;
 }
+
 .chart-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+  padding: 16px 24px;
+  background: var(--cloud-gray);
+  border-radius: var(--radius-comfortable);
+  transition: all 0.2s ease;
 }
 
-:deep(.resource-tooltip) {
-  .ant-tooltip-inner {
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-  }
+.chart-container:hover {
+  background: var(--pure-white);
+  box-shadow: var(--shadow-whisper);
+}
+
+:deep(.resource-tooltip .arco-tooltip-content) {
+  background: var(--near-black) !important;
+  color: var(--pure-white);
+  padding: 8px 12px;
+  border-radius: var(--radius-subtle);
+  font-size: 12px;
 }
 </style>

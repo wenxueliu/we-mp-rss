@@ -5,24 +5,26 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build  --mode production",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.0",
     "@arco-design/web-vue": "^2.57.0",
-    "ant-design-vue": "^4.2.6",
     "axios": "^1.12.0",
-    "codemirror": "^6.0.2",
     "i18n-jsautotranslate": "^3.17.0",
     "monaco-editor": "^0.54.0",
     "vue": "^3.2.0",
-    "vue-codemirror": "^6.1.1",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.0.0",
-    "fs-extra": "^11.2.0",
+    "@playwright/test": "^1.59.1",
+    "@vitejs/plugin-vue": "^2.3.4",
+    "@vue/test-utils": "^2.4.6",
     "typescript": "^4.5.0",
     "vite": "^2.9.18",
-    "vite-plugin-vue-type-imports": "^0.1.1"
+    "vite-plugin-vue-type-imports": "^0.1.1",
+    "vitest": "^4.1.3"
   }
 }

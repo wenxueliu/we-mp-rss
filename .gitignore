@@ -26,3 +26,8 @@ test.yaml
 .trae
 test.py
 .gstack/
+web_ui/dist_test/
+web_ui/.omc/
+.omc
+web_ui/src/views/.omc/
+.remember
