@@ -1,0 +1,130 @@
+site: bilibili
+name: dynamics
+description: "获取B站用户空间动态，支持分页获取"
+meta_title: "B站用户动态 - 哔哩哔哩"
+meta_description: "B站用户空间动态列表"
+meta_keywords: "bilibili,动态,空间,B站"
+tags: [bilibili, dynamics, feed, social, china]
+domain: space.bilibili.com
+strategy: cookie
+browser: true
+
+args:
+  user_id:
+    positional: true
+    type: str
+    required: true
+    description: "B站用户UID，位于个人空间URL https://space.bilibili.com/ 后面的数字"
+  limit:
+    type: int
+    required: false
+    default: 20
+    description: "返回动态数量上限"
+  offset:
+    type: int
+    required: false
+    default: 0
+    description: "跳过前N条动态"
+  all:
+    type: bool
+    required: false
+    default: false
+    description: "是否获取全部动态（设为 true 时忽略 limit/offset，自动遍历所有分页）"
+
+columns: [rank, type, content, like_count, comment_count, repost_count, publish_time, url]
+
+pipeline:
+  - navigate: https://space.bilibili.com/${{ args.user_id }}/dynamic
+
+  - evaluate: |
+      (async () => {
+        const uid = ${{ args.user_id | json }};
+        const limit = ${{ args.limit }};
+        const startOffset = ${{ args.offset }};
+        const fetchAll = ${{ args.all }};
+
+        const maxResults = fetchAll ? 99999 : limit;
+        const allData = [];
+        let cursor = '';
+        let rank = startOffset + 1;
+        let skipped = 0;
+        let collected = 0;
+
+        while (collected < maxResults) {
+          const url = 'https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?host_mid='
+            + encodeURIComponent(uid) + '&offset=' + encodeURIComponent(cursor);
+          const res = await fetch(url, { credentials: 'include' });
+          const data = await res.json();
+
+          if (data.code !== 0 || !data.data || !data.data.items) break;
+
+          const items = data.data.items;
+          if (items.length === 0) break;
+
+          for (const item of items) {
+            // Skip items up to startOffset
+            if (skipped < startOffset) {
+              skipped++;
+              continue;
+            }
+            if (collected >= maxResults) break;
+
+            const modules = item.modules || {};
+            const modDynamic = modules.module_dynamic || {};
+            const desc = modDynamic.desc;
+            const stat = modules.module_stat || {};
+            const author = modules.module_author || {};
+
+            let content = '';
+            if (desc && desc.text) {
+              content = desc.text;
+            }
+
+            let dynType = 'dynamic';
+            const t = item.type || '';
+            if (t.includes('AV')) dynType = 'video';
+            else if (t.includes('DRAW')) dynType = 'image';
+            else if (t.includes('FORWARD')) dynType = 'forward';
+            else if (t.includes('WORD')) dynType = 'text';
+            else if (t.includes('ARTICLE')) dynType = 'article';
+            else if (t.includes('LIVE')) dynType = 'live';
+            else if (t.includes('PGC')) dynType = 'bangumi';
+            else if (t.includes('COMMON')) dynType = 'share';
+
+            const pubTs = author.pub_ts || 0;
+            const pubTime = pubTs ? new Date(pubTs * 1000).toISOString() : '';
+            const dynId = item.id_str || '';
+
+            allData.push({
+              rank: rank++,
+              type: dynType,
+              content: content,
+              like_count: String(stat.like?.count || 0),
+              comment_count: String(stat.comment?.count || 0),
+              repost_count: String(stat.forward?.count || 0),
+              publish_time: pubTime,
+              url: dynId ? 'https://t.bilibili.com/' + dynId : '',
+            });
+            collected++;
+          }
+
+          cursor = data.data.offset || '';
+          if (!data.data.has_more) break;
+
+          if (!fetchAll) break;
+        }
+
+        return allData;
+      })()
+
+  - map:
+      rank: ${{ item.rank }}
+      type: ${{ item.type | default("dynamic") }}
+      content: ${{ item.content | truncate(300) | default("") }}
+      like_count: ${{ item.like_count | default("0") }}
+      comment_count: ${{ item.comment_count | default("0") }}
+      repost_count: ${{ item.repost_count | default("0") }}
+      publish_time: ${{ item.publish_time | default("") }}
+      url: ${{ item.url | default("") }}
+
+  - limit: '${{ args.all ? 99999 : args.limit }}'

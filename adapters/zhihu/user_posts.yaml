@@ -1,0 +1,95 @@
+site: zhihu
+name: user_posts
+description: "获取知乎用户主页的文章列表，支持分页和一次获取全部文章"
+meta_title: "知乎用户文章列表 - 知乎"
+meta_description: "知乎用户文章列表页"
+meta_keywords: "知乎,文章,专栏"
+tags: [zhihu, articles, blog, content, china]
+domain: www.zhihu.com
+strategy: cookie
+browser: true
+
+args:
+  user_id:
+    positional: true
+    type: str
+    required: true
+    description: "知乎用户ID，位于个人主页URL中 /people/ 后面的部分"
+  limit:
+    type: int
+    required: false
+    default: 20
+    description: "返回文章数量上限"
+  offset:
+    type: int
+    required: false
+    default: 0
+    description: "起始偏移量（用于分页）"
+  all:
+    type: bool
+    required: false
+    default: false
+    description: "是否获取全部文章（设为 true 时忽略 limit/offset，自动遍历所有分页）"
+
+columns: [rank, title, url, summary, like_count, comment_count, publish_time, cover_image]
+
+pipeline:
+  - navigate: https://www.zhihu.com
+
+  - evaluate: |
+      (async () => {
+        const userToken = ${{ args.user_id | json }};
+        const limit = ${{ args.limit }};
+        const offset = ${{ args.offset }};
+        const fetchAll = ${{ args.all }};
+
+        const PAGE_SIZE = 20;
+        const maxResults = fetchAll ? 99999 : limit;
+        let allData = [];
+        let currentOffset = offset;
+        let isEnd = false;
+        let rankSeq = offset + 1;
+
+        while (allData.length < maxResults && !isEnd) {
+          const reqLimit = fetchAll ? PAGE_SIZE : Math.min(maxResults, PAGE_SIZE);
+          const url = 'https://www.zhihu.com/api/v4/members/' + userToken
+            + '/articles?limit=' + reqLimit + '&offset=' + currentOffset + '&sort_by=created'
+            + '&include=data%5B*%5D.comment_count%2Cvoteup_count%2Ccreated%2Cupdated%2Cthumbnail%2Ctitle_image%2Cexcerpt';
+
+          const res = await fetch(url, { credentials: 'include' });
+          const text = await res.text();
+          const data = JSON.parse(text.replace(/("id"\s*:\s*)(\d{16,})/g, '$1"$2"'));
+
+          if (!data.data || data.data.length === 0) break;
+
+          for (const article of data.data) {
+            allData.push({
+              rank: rankSeq++,
+              title: article.title || '',
+              url: (article.url || 'https://zhuanlan.zhihu.com/p/' + article.id).replace(/^http:\/\//, 'https://'),
+              summary: (article.excerpt || '').replace(/<[^>]+>/g, ''),
+              like_count: String(article.voteup_count || 0),
+              comment_count: String(article.comment_count || 0),
+              publish_time: article.created ? new Date(article.created * 1000).toISOString() : '',
+              cover_image: article.title_image || article.thumbnail || '',
+            });
+          }
+
+          isEnd = data.paging?.is_end !== false;
+          currentOffset += reqLimit;
+
+          if (!fetchAll) break;
+        }
+
+        return allData;
+      })()
+  - map:
+      rank: ${{ item.rank }}
+      title: ${{ item.title | truncate(100) }}
+      url: ${{ item.url | default("") }}
+      summary: ${{ item.summary | truncate(200) | default("") }}
+      like_count: ${{ item.like_count | default("0") }}
+      comment_count: ${{ item.comment_count | default("0") }}
+      publish_time: ${{ item.publish_time | default("") }}
+      cover_image: ${{ item.cover_image | default("") }}
+  - limit: '${{ args.all ? 99999 : args.limit }}'

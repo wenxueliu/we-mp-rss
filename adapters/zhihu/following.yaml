@@ -1,0 +1,73 @@
+site: zhihu
+name: following
+description: 获取用户关注的知乎用户列表
+domain: www.zhihu.com
+strategy: cookie
+browser: true
+
+args:
+  user_token:
+    type: str
+    positional: true
+    required: true
+    description: 用户 token（个人主页 URL 中的标识，如 liu-wen-xue）
+  limit:
+    type: int
+    default: 20
+    description: 获取数量
+  offset:
+    type: int
+    default: 0
+    description: 偏移量
+  all:
+    type: bool
+    default: false
+    description: 是否获取全部关注人（设为 true 时自动遍历所有分页）
+
+columns: [name, url_token, headline]
+
+pipeline:
+  - navigate: https://www.zhihu.com
+  - evaluate: |
+      (async () => {
+        const userToken = ${{ args.user_token | json }};
+        const limit = ${{ args.limit }};
+        const offset = ${{ args.offset }};
+        const fetchAll = ${{ args.all }};
+
+        const PAGE_SIZE = 20;
+        const maxResults = fetchAll ? 99999 : limit;
+        let allData = [];
+        let currentOffset = offset;
+        let isEnd = false;
+
+        while (allData.length < maxResults && !isEnd) {
+          const reqLimit = fetchAll ? PAGE_SIZE : Math.min(maxResults, PAGE_SIZE);
+          const url = `https://www.zhihu.com/api/v4/members/${userToken}/followees?limit=${reqLimit}&offset=${currentOffset}`;
+          const res = await fetch(url, { credentials: 'include' });
+          const text = await res.text();
+          const data = JSON.parse(text.replace(/("id"\s*:\s*)(\d{16,})/g, '$1"$2"'));
+
+          if (!data.data || data.data.length === 0) break;
+
+          for (const user of data.data) {
+            allData.push({
+              name: user.name,
+              url_token: user.url_token,
+              headline: user.headline || '',
+            });
+          }
+
+          isEnd = data.paging?.is_end !== false;
+          currentOffset += reqLimit;
+
+          if (!fetchAll) break;
+        }
+
+        return allData;
+      })()
+  - map:
+      name: ${{ item.name }}
+      url_token: ${{ item.url_token }}
+      headline: ${{ item.headline }}
+  - limit: '${{ args.all ? 99999 : args.limit }}'
