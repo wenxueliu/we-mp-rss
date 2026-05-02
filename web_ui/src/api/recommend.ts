@@ -224,3 +224,27 @@ export const createPreset = (data: {
 }) => {
   return http.post<{ code: number; data: { id: number } }>('/wx/recommend/presets', data)
 }
+
+/**
+ * 搜索结果项接口
+ */
+export interface SearchResult {
+  id: number
+  title: string
+  summary?: string
+  url: string
+  author?: string
+  source_type: string
+  source_name?: string
+  published_at?: string
+}
+
+/**
+ * 搜索推荐内容
+ */
+export const searchContents = (q: string, signal?: AbortSignal) => {
+  return http.get<{ code: number; data: { items: SearchResult[]; total: number } }>(
+    '/wx/search',
+    { params: { q }, signal }
+  )
+}
