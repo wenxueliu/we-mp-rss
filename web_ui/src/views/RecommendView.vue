@@ -2,8 +2,9 @@
 import { ref, watch, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { getContents } from '@/api/recommend'
-import type { RecommendContent } from '@/api/recommend'
+import type { RecommendContent, SearchResult } from '@/api/recommend'
 import RecommendationCard from '@/components/RecommendationCard.vue'
+import SearchBar from '@/components/SearchBar.vue'
 
 const loading = ref(false)
 const contents = ref<RecommendContent[]>([])
@@ -11,6 +12,12 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const filterStatus = ref('')
+
+// 搜索状态
+const isSearching = ref(false)
+const searchResults = ref<SearchResult[]>([])
+const searchError = ref('')
+const isSearchActive = ref(false)
 
 watch(filterStatus, () => {
   page.value = 1
@@ -40,12 +47,37 @@ const handlePageChange = (pageNum: number) => {
 }
 
 const handleRefresh = () => {
+  isSearchActive.value = false
+  searchResults.value = []
+  searchError.value = ''
   loadContents()
 }
 
 const handleInteract = () => {
-  // 重新加载列表（后端已过滤掉已处理的内容）
   loadContents()
+}
+
+// 搜索事件处理
+const handleSearch = (results: SearchResult[]) => {
+  isSearchActive.value = true
+  searchResults.value = results
+  searchError.value = ''
+}
+
+const handleSearchClear = () => {
+  isSearchActive.value = false
+  searchResults.value = []
+  searchError.value = ''
+}
+
+const handleSearching = (value: boolean) => {
+  isSearching.value = value
+}
+
+const handleSearchError = (message: string) => {
+  isSearchActive.value = true
+  searchError.value = message
+  searchResults.value = []
 }
 
 onMounted(() => {
@@ -74,35 +106,75 @@ onMounted(() => {
       </template>
     </a-page-header>
 
+    <!-- 搜索栏 -->
+    <SearchBar
+      @search="handleSearch"
+      @clear="handleSearchClear"
+      @searching="handleSearching"
+      @error="handleSearchError"
+    />
+
     <a-card class="content-card">
-      <div v-if="loading" class="loading-container">
-        <a-spin tip="加载中..." size="large" />
+      <!-- 搜索加载中 -->
+      <div v-if="isSearching" class="status-container">
+        <a-spin tip="搜索中..." size="large" />
       </div>
 
-      <div v-else-if="contents.length === 0" class="empty-container">
-        <a-empty description="暂无推荐内容" />
+      <!-- 搜索错误 -->
+      <div v-else-if="isSearchActive && searchError" class="status-container">
+        <a-result status="error" title="搜索暂不可用" :subtitle="searchError">
+          <template #extra>
+            <a-button type="primary" @click="handleRefresh">返回推荐列表</a-button>
+          </template>
+        </a-result>
       </div>
 
-      <div v-else>
+      <!-- 搜索无结果 -->
+      <div v-else-if="isSearchActive && searchResults.length === 0 && !isSearching" class="status-container">
+        <a-empty description="未找到匹配内容" />
+      </div>
+
+      <!-- 搜索有结果 -->
+      <div v-else-if="isSearchActive && searchResults.length > 0">
         <RecommendationCard
-          v-for="item in contents"
+          v-for="item in searchResults"
           :key="item.id"
-          :item="item"
+          :item="item as RecommendContent"
           @interact="handleInteract"
         />
-
-        <div class="pagination-container">
-          <a-pagination
-            :current="page"
-            :page-size="pageSize"
-            :total="total"
-            @change="handlePageChange"
-            show-total
-            :page-size-options="[10, 20, 50]"
-            :show-page-size="true"
-          />
-        </div>
       </div>
+
+      <!-- 默认推荐列表 -->
+      <template v-else>
+        <div v-if="loading" class="status-container">
+          <a-spin tip="加载中..." size="large" />
+        </div>
+
+        <div v-else-if="contents.length === 0" class="status-container">
+          <a-empty description="暂无推荐内容" />
+        </div>
+
+        <div v-else>
+          <RecommendationCard
+            v-for="item in contents"
+            :key="item.id"
+            :item="item"
+            @interact="handleInteract"
+          />
+
+          <div class="pagination-container">
+            <a-pagination
+              :current="page"
+              :page-size="pageSize"
+              :total="total"
+              @change="handlePageChange"
+              show-total
+              :page-size-options="[10, 20, 50]"
+              :show-page-size="true"
+            />
+          </div>
+        </div>
+      </template>
     </a-card>
   </div>
 </template>
@@ -117,7 +189,6 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-/* Expo Page Header */
 .page-header {
   padding: 0 0 32px 0;
   margin-bottom: 32px;
@@ -150,7 +221,6 @@ onMounted(() => {
   border-radius: var(--radius-pill) !important;
 }
 
-/* Expo Card */
 .content-card {
   border-radius: var(--radius-comfortable) !important;
   border: 1px solid var(--border-lavender) !important;
@@ -159,14 +229,7 @@ onMounted(() => {
   padding: 24px;
 }
 
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.empty-container {
+.status-container {
   display: flex;
   justify-content: center;
   align-items: center;
